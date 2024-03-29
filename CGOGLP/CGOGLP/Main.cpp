@@ -7,8 +7,14 @@
 
 #include <iostream>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#include <vector>
+
 //Functions
 void inputProcessor(GLFWwindow* window);
+void mouse_movement(GLFWwindow* window, double xposIn, double yposIn);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 //Settings
@@ -16,7 +22,7 @@ const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, -1.0f, 0.0f));
 float lastX = WINDOW_WIDTH / 2.0f;
 float lastY = WINDOW_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -27,7 +33,7 @@ float lastFrame = 0.0f;
 
 //Cube
 //nog veranderen naar coordinaten systeem
-float vertices[] = {
+float verticesB[] = {
        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -88,6 +94,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+
 	//Window
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Bjarne loves Jens xxx", NULL, NULL);
     if (window == NULL)
@@ -98,6 +105,7 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_movement);
 
     //Load glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -106,8 +114,82 @@ int main()
         return -1;
     }
 
-    Shader shaders("Shader.vert", "Shader.frag");
+    // configure global opengl state
+    glEnable(GL_DEPTH_TEST);
 
+    Shader shaders("ShaderH.vert", "ShaderH.frag");
+
+    // load height map texture
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("iceland_heightmap.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        std::cout << "Loaded heightmap of size " << height << " x " << width << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+
+
+    // vertex generation
+    std::vector<float> vertices;
+    float yScale = 64.0f / 256.0f, yShift = 16.0f;  // apply a scale+shift to the height data
+    int rez = 1;
+    unsigned bytePerPixel = nrChannels;
+    for (int i = 0; i < height; i++)
+    {
+        for (int j = 0; j < width; j++)
+        {
+            unsigned char* pixelOffset = data + (j + width * i) * bytePerPixel;
+            unsigned char y = pixelOffset[0];
+
+            // vertex
+            vertices.push_back(-height / 2.0f + height * i / (float)height);   // vx
+            vertices.push_back((int)y * yScale - yShift);   // vy
+            vertices.push_back(-width / 2.0f + width * j / (float)width);   // vz
+        }
+    }
+
+    //freeup image data
+    stbi_image_free(data);
+
+    // index generation
+    std::vector<unsigned> indices;
+    for (unsigned i = 0; i < height - 1; i += rez)
+    {
+        for (unsigned j = 0; j < width; j += rez)
+        {
+            for (unsigned k = 0; k < 2; k++)
+            {
+                indices.push_back(j + width * (i + k * rez));
+            }
+        }
+    }
+
+    const unsigned int NUM_STRIPS = (height - 1) / rez;
+    const unsigned int NUM_VERTS_PER_STRIP = (width / rez) * 2 - 2;
+
+    // register VAO
+    unsigned int terrainVAO, terrainVBO, terrainIBO;
+    glGenVertexArrays(1, &terrainVAO);
+    glBindVertexArray(terrainVAO);
+
+    glGenBuffers(1, &terrainVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glGenBuffers(1, &terrainIBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainIBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned), &indices[0], GL_STATIC_DRAW);
+
+  
+    /*
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -115,11 +197,12 @@ int main()
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesB), verticesB, GL_STATIC_DRAW);
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    */
     shaders.use();
     
 
@@ -149,6 +232,25 @@ int main()
         glm::mat4 view = camera.GetViewMatrix();
         shaders.setMat4("view", view);
 
+        // world transformation
+        glm::mat4 model = glm::mat4(1.0f);
+        shaders.setMat4("model", model);
+
+        // draw mesh
+        glBindVertexArray(terrainVAO);
+
+        //cool wiremesh thingy
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        for (unsigned strip = 0; strip < NUM_STRIPS; strip++)
+        {
+            glDrawElements(GL_TRIANGLE_STRIP,   // primitive type
+                NUM_VERTS_PER_STRIP + 2,   // number of indices to render
+                GL_UNSIGNED_INT,     // index data type
+                (void*)(sizeof(unsigned) * (NUM_VERTS_PER_STRIP + 2) * strip)); // offset to starting index
+        }
+
+
+        /*
         // render boxes
         glBindVertexArray(VAO);
         for (unsigned int i = 0; i < 10; i++)
@@ -162,7 +264,7 @@ int main()
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
+        */
 
 
         //Swap buffers
@@ -172,8 +274,13 @@ int main()
     }
 
     // cleanup
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    //glDeleteVertexArrays(1, &VAO);
+    //glDeleteBuffers(1, &VBO);
+
+    glDeleteVertexArrays(1, &terrainVAO);
+    glDeleteBuffers(1, &terrainVBO);
+    glDeleteBuffers(1, &terrainIBO);
+
     glfwTerminate();
     return 0;
 
@@ -203,8 +310,9 @@ void inputProcessor(GLFWwindow* window)
 
 void mouse_movement(GLFWwindow* window, double xposIn, double yposIn)
 {
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
+    //input from mouse (turned around bc weird terrain generation)
+    float xpos = static_cast<float>(xposIn*-1);
+    float ypos = static_cast<float>(yposIn*-1);
 
     if (firstMouse)
     {
