@@ -22,7 +22,7 @@ const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 float lastX = WINDOW_WIDTH / 2.0f;
 float lastY = WINDOW_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -82,6 +82,7 @@ glm::vec3 cubePositions[] = {
     glm::vec3(0.0f,  0.0f,  0.0f),
     glm::vec3(2.0f,  5.0f, -15.0f)
 };
+
 
 
 
@@ -229,6 +230,8 @@ int main()
         shaders.setMat4("projection", projection);
 
         // camera/view transformation
+        camera.SetCameraHeight(10.1f);
+        //std::cout << "camera height " << camera.GetHeight() << std::endl;
         glm::mat4 view = camera.GetViewMatrix();
         shaders.setMat4("view", view);
 
@@ -310,9 +313,8 @@ void inputProcessor(GLFWwindow* window)
 
 void mouse_movement(GLFWwindow* window, double xposIn, double yposIn)
 {
-    //input from mouse (turned around bc weird terrain generation)
-    float xpos = static_cast<float>(xposIn*-1);
-    float ypos = static_cast<float>(yposIn*-1);
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
 
     if (firstMouse)
     {

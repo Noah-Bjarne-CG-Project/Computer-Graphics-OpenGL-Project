@@ -62,6 +62,14 @@ class Camera
 
         }
 
+        void SetCameraHeight(float height) {
+            Position.y = height;
+        }
+
+        float GetHeight() {
+            return Position.y;
+        }
+
         // processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
         void ProcessKeyboard(Camera_Directions direction, float deltaTime)
         {
