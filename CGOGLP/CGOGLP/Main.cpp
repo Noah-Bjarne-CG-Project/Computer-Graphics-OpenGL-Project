@@ -90,6 +90,7 @@ int main()
 {
     //configure glfw
     glfwInit();
+
     //Open Gl 3.3 voor compatibiliteit
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -226,7 +227,7 @@ int main()
         shaders.use();
 
         // pass projection matrix to shader (note that in this case it could change every frame)
-        glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f); //fov, aspect ratio, dichts zichtbare en verst zichtbare
         shaders.setMat4("projection", projection);
 
         // camera/view transformation
@@ -243,7 +244,8 @@ int main()
         glBindVertexArray(terrainVAO);
 
         //cool wiremesh thingy
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
         for (unsigned strip = 0; strip < NUM_STRIPS; strip++)
         {
             glDrawElements(GL_TRIANGLE_STRIP,   // primitive type
