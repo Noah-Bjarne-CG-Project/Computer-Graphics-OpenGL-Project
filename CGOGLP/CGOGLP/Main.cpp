@@ -116,7 +116,7 @@ int main()
         return -1;
     }
 
-    // configure global opengl state
+    // Diepte buffer opengl
     glEnable(GL_DEPTH_TEST);
 
     Shader shaders("ShaderH.vert", "ShaderH.frag");
@@ -135,6 +135,17 @@ int main()
     }
 
 
+    
+    std::vector<float> texCoords;
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            float u = (float)j / (float)(width - 1);
+            float v = (float)i / (float)(height - 1);
+            texCoords.push_back(u);
+            texCoords.push_back(v);
+        }
+    }
+
     // vertex generation
     std::vector<float> vertices;
     float yScale = 64.0f / 256.0f, yShift = 16.0f;  // apply a scale+shift to the height data
@@ -151,8 +162,14 @@ int main()
             vertices.push_back(-height / 2.0f + height * i / (float)height);   // vx
             vertices.push_back((int)y * yScale - yShift);   // vy
             vertices.push_back(-width / 2.0f + width * j / (float)width);   // vz
+
+            // texture coordinates
+            vertices.push_back(texCoords[i * width + j * 2]);   // u
+            vertices.push_back(texCoords[i * width + j * 2 + 1]); // v
         }
     }
+
+  
 
     //freeup image data
     stbi_image_free(data);
@@ -173,40 +190,71 @@ int main()
     const unsigned int NUM_STRIPS = (height - 1) / rez;
     const unsigned int NUM_VERTS_PER_STRIP = (width / rez) * 2 - 2;
 
-    // register VAO
-    unsigned int terrainVAO, terrainVBO, terrainIBO;
-    glGenVertexArrays(1, &terrainVAO);
-    glBindVertexArray(terrainVAO);
+    // Mess dit naar andere file/ apparte classes vor cleanup?
+    //EBO = element array buffer
+    unsigned int VAO, VBO, EBO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
 
-    glGenBuffers(1, &terrainVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 
+    /*
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    glGenBuffers(1, &terrainIBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainIBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned), &indices[0], GL_STATIC_DRAW);
-
-  
-    /*
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesB), verticesB, GL_STATIC_DRAW);
-
-    // position attribute
+    */
+    // Configure position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    */
+    // Configure texture coordinate attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned), &indices[0], GL_STATIC_DRAW);
+
+    //shaders.use();
+
+    //Texture
+    int widthImg, heigthImg, numColCh;
+    unsigned char* bytes = stbi_load("grassy.jpg", &widthImg, &heigthImg, &numColCh, 0);
+    if (bytes)
+    {
+        std::cout << "Loaded himage " << height << " x " << width << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    //soort van texture array gedoe
+    glActiveTexture(GL_TEXTURE0); // texture 0 = grass now
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    //gl repear gedoe is per axis ingesteld
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //GL_RGB = jpg -> GL_RGBA = png
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heigthImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(bytes);
+    glBindTexture(GL_TEXTURE_2D,0);
+
+    GLuint tex0Uni = glGetUniformLocation(shaders.ID, "tex0");
     shaders.use();
-    
+    glUniform1i(tex0Uni,0);
 
 
     // render loop
@@ -225,7 +273,10 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
         shaders.use();
+        glBindTexture(GL_TEXTURE_2D, texture);
 
+
+        //coordinaten systemen (projection, view,model)
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f); //fov, aspect ratio, dichts zichtbare en verst zichtbare
         shaders.setMat4("projection", projection);
@@ -240,8 +291,9 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         shaders.setMat4("model", model);
 
+
         // draw mesh
-        glBindVertexArray(terrainVAO);
+        glBindVertexArray(VAO);
 
         //cool wiremesh thingy
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -255,22 +307,7 @@ int main()
         }
 
 
-        /*
-        // render boxes
-        glBindVertexArray(VAO);
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            // calculate the model matrix for each object and pass it to shader before drawing
-            glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            shaders.setMat4("model", model);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        */
-
+      
 
         //Swap buffers
         glfwSwapBuffers(window);
@@ -279,12 +316,10 @@ int main()
     }
 
     // cleanup
-    //glDeleteVertexArrays(1, &VAO);
-    //glDeleteBuffers(1, &VBO);
-
-    glDeleteVertexArrays(1, &terrainVAO);
-    glDeleteBuffers(1, &terrainVBO);
-    glDeleteBuffers(1, &terrainIBO);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteTextures(1, &texture);
 
     glfwTerminate();
     return 0;

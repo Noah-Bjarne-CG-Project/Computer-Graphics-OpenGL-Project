@@ -60,5 +60,11 @@
     <Image Include="iceland_heightmap.png">
       <Filter>Resource Files\Heightmaps</Filter>
     </Image>
+    <Image Include="wall.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="grassy.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

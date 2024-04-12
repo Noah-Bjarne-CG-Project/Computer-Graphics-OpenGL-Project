@@ -147,7 +147,9 @@
     <None Include="ShaderH.vert" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="grassy.jpg" />
     <Image Include="iceland_heightmap.png" />
+    <Image Include="wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
