@@ -148,7 +148,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="grassy.jpg" />
+    <Image Include="grassy2.jpg" />
     <Image Include="iceland_heightmap.png" />
+    <Image Include="squareheightmap.png" />
+    <Image Include="stupid.jpg" />
     <Image Include="wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

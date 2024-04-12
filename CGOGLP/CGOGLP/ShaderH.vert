@@ -6,7 +6,7 @@ layout (location = 1) in vec2 aTexCoords;
 out float Height;
 out vec3 Position;
 out vec2 TexCoords;
-out vec3 Color;
+out vec4 Color;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -17,6 +17,7 @@ void main()
     Height = aPos.y;
     Position = (view * model * vec4(aPos, 1.0f)).xyz;
     //Color = aColor;
+    Color = vec4(Height,Height,Height,1.0f);
     TexCoords = aTexCoords;
     gl_Position = projection * view * model * vec4(aPos, 1.0f);
 }

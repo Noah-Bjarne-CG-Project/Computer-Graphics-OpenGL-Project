@@ -17,6 +17,7 @@ void inputProcessor(GLFWwindow* window);
 void mouse_movement(GLFWwindow* window, double xposIn, double yposIn);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
+
 //Settings
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
@@ -126,7 +127,7 @@ int main()
     unsigned char* data = stbi_load("iceland_heightmap.png", &width, &height, &nrChannels, 0);
     if (data)
     {
-        std::cout << "Loaded heightmap of size " << height << " x " << width << std::endl;
+        std::cout << "Loaded heightmap of size " << height << " x " << width <<" nr channels: "<< nrChannels << std::endl;
     }
     else
     {
@@ -137,14 +138,16 @@ int main()
 
     
     std::vector<float> texCoords;
+    float repeat = 10.0f; // Adjust this value to change the number of times the texture repeats
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            float u = (float)j / (float)(width - 1);
-            float v = (float)i / (float)(height - 1);
+            float u = ((float)j / (float)(width - 1)) * repeat;
+            float v = ((float)i / (float)(height - 1)) * repeat;
             texCoords.push_back(u);
             texCoords.push_back(v);
         }
     }
+
 
     // vertex generation
     std::vector<float> vertices;
@@ -162,7 +165,7 @@ int main()
             vertices.push_back(-height / 2.0f + height * i / (float)height);   // vx
             vertices.push_back((int)y * yScale - yShift);   // vy
             vertices.push_back(-width / 2.0f + width * j / (float)width);   // vz
-
+            
             // texture coordinates
             vertices.push_back(texCoords[i * width + j * 2]);   // u
             vertices.push_back(texCoords[i * width + j * 2 + 1]); // v
@@ -206,11 +209,13 @@ int main()
     glEnableVertexAttribArray(0);
     */
     // Configure position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    
     // Configure texture coordinate attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    
 
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -220,7 +225,7 @@ int main()
 
     //Texture
     int widthImg, heigthImg, numColCh;
-    unsigned char* bytes = stbi_load("grassy.jpg", &widthImg, &heigthImg, &numColCh, 0);
+    unsigned char* bytes = stbi_load("stupid.jpg", &widthImg, &heigthImg, &numColCh, 0);
     if (bytes)
     {
         std::cout << "Loaded himage " << height << " x " << width << std::endl;
@@ -241,9 +246,9 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     //gl repear gedoe is per axis ingesteld
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
     //GL_RGB = jpg -> GL_RGBA = png
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heigthImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);

@@ -66,5 +66,14 @@
     <Image Include="grassy.jpg">
       <Filter>Resource Files\Textures</Filter>
     </Image>
+    <Image Include="squareheightmap.png">
+      <Filter>Resource Files\Heightmaps</Filter>
+    </Image>
+    <Image Include="grassy2.jpg">
+      <Filter>Resource Files\Heightmaps</Filter>
+    </Image>
+    <Image Include="stupid.jpg">
+      <Filter>Resource Files\Heightmaps</Filter>
+    </Image>
   </ItemGroup>
 </Project>
