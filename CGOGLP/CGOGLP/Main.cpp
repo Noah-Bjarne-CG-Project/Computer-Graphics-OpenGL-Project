@@ -363,22 +363,28 @@ int main()
 
 //Processes key inputs
 void inputProcessor(GLFWwindow* window)
-{
+{   
+    bool shift = false;
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        shift = true;
+        std::cout << "LSHIFT pressed" << std::endl;
+    }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.ProcessKeyboard(FORWARD, shift,deltaTime);
         std::cout << "W pressed" << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera.ProcessKeyboard(BACKWARD, shift, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.ProcessKeyboard(LEFT, shift, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.ProcessKeyboard(RIGHT, shift, deltaTime);
     }
 }
 
