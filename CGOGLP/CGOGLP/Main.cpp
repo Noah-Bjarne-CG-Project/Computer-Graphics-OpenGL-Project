@@ -21,6 +21,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 //Settings
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
+const float PLAYER_HEIGHT = 1.0f;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -287,8 +288,34 @@ int main()
         glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f); //fov, aspect ratio, dichts zichtbare en verst zichtbare
         shaders.setMat4("projection", projection);
 
+        //-------------------------------------------------------------- DIT OPRUIMEN LIKE IN FUNCTIE ZETTE OFZO NOG
+        // Assuming camX and camZ are the x and z coordinates of the camera
+        float camX, camZ;
+        camX = camera.Position.x;
+        camZ = camera.Position.z;
+        /* PRINT ALS DEBUG MODE ME VARIABEL? OF TEVEEL INPAKT OP SYSTEEM?
+        std::cout << "camX? " << camX << std::endl;
+        std::cout << "camY? " << camZ << std::endl;
+        */
+
+        // Normalize the camera's position to the range of the terrain
+        int normCamX = (camX + height / 2.0f) * (float)height / height;
+        int normCamZ = (camZ + width / 2.0f) * (float)width / width;
+
+        // Find the corresponding vertex in the terrain data
+        int vertexIndex = 5 * (normCamX * width + normCamZ); // 5 because each vertex has 5 components (vx, vy, vz, u, v)
+
+        // Get the height of the terrain at the camera's position
+        float terrainHeight = vertices[vertexIndex + 1]; // +1 because vy is the second component
+
+        //std::cout << "Heigth? " << terrainHeight << std::endl;
+
+        //--------------------------------------------------------------
+
+
+
         // camera/view transformation
-        camera.SetCameraHeight(10.1f);
+        camera.SetCameraHeight(terrainHeight + PLAYER_HEIGHT);
         //std::cout << "camera height " << camera.GetHeight() << std::endl;
         glm::mat4 view = camera.GetViewMatrix();
         shaders.setMat4("view", view);
