@@ -288,6 +288,7 @@ int main()
         glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f); //fov, aspect ratio, dichts zichtbare en verst zichtbare
         shaders.setMat4("projection", projection);
 
+        //Momenteel blokkerig maar wss oplosbaar
         //-------------------------------------------------------------- DIT OPRUIMEN LIKE IN FUNCTIE ZETTE OFZO NOG
         // Assuming camX and camZ are the x and z coordinates of the camera
         float camX, camZ;
