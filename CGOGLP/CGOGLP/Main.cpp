@@ -138,7 +138,7 @@ int main()
 
     
     std::vector<float> texCoords;
-    float repeat = 10.0f; // Adjust this value to change the number of times the texture repeats
+    float repeat = 100.0f; // Adjust this value to change the number of times the texture repeats
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             float u = ((float)j / (float)(width - 1)) * repeat;
@@ -167,8 +167,8 @@ int main()
             vertices.push_back(-width / 2.0f + width * j / (float)width);   // vz
             
             // texture coordinates
-            vertices.push_back(texCoords[i * width + j * 2]);   // u
-            vertices.push_back(texCoords[i * width + j * 2 + 1]); // v
+            vertices.push_back(texCoords[2 * (i * width + j)]);   // u
+            vertices.push_back(texCoords[2 * (i * width + j) + 1]); // v
         }
     }
 
@@ -209,12 +209,13 @@ int main()
     glEnableVertexAttribArray(0);
     */
     // Configure position attribute
-    glEnableVertexAttribArray(0);
+ 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
     
     // Configure texture coordinate attribute
-    glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
     
 
     glGenBuffers(1, &EBO);
@@ -225,7 +226,7 @@ int main()
 
     //Texture
     int widthImg, heigthImg, numColCh;
-    unsigned char* bytes = stbi_load("stupid.jpg", &widthImg, &heigthImg, &numColCh, 0);
+    unsigned char* bytes = stbi_load("grassy2.jpg", &widthImg, &heigthImg, &numColCh, 0);
     if (bytes)
     {
         std::cout << "Loaded himage " << height << " x " << width << std::endl;
@@ -246,9 +247,9 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     //gl repear gedoe is per axis ingesteld
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     //GL_RGB = jpg -> GL_RGBA = png
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImg, heigthImg, 0, GL_RGB, GL_UNSIGNED_BYTE, bytes);
