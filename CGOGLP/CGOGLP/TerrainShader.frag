@@ -10,6 +10,7 @@ uniform sampler2D tex0;
 
 void main()
 {
+    //Mess met specular light gaan werken in de toekomst voor mooier detail. maar pas wnr textures finalized zijn
     //FragColor = vec4(h, h, h, 1.0);
     //vec2 texCoord = vec2(1.0f,1.0f);
     vec4 TexColor = texture(tex0,TexCoords);
