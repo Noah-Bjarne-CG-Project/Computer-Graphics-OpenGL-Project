@@ -178,16 +178,38 @@ int main()
             unsigned char y = pixelOffset[0];
 
             // vertex
-            vertices.push_back(-height / 2.0f + height * i / (float)height);   // vx
-            vertices.push_back((int)y * yScale - yShift);   // vy
-            vertices.push_back(-width / 2.0f + width * j / (float)width);   // vz
-            
+            float vx = -height / 2.0f + height * i / (float)height;
+            float vy = (int)y * yScale - yShift;
+            float vz = -width / 2.0f + width * j / (float)width;
+            vertices.push_back(vx);   // vx
+            vertices.push_back(vy);   // vy
+            vertices.push_back(vz);   // vz
+
             // texture coordinates
             vertices.push_back(texCoords[2 * (i * width + j)]);   // u
             vertices.push_back(texCoords[2 * (i * width + j) + 1]); // v
+
+            // calculate normals (Dit not niet 100% correct maar goed genoeg atm)
+            if (i > 0 && j > 0 && i < height - 1 && j < width - 1)
+            {
+                glm::vec3 v1 = glm::vec3(vx - vertices[(i - 1) * width + j], vy - vertices[(i - 1) * width + j + 1], vz - vertices[(i - 1) * width + j + 2]);
+                glm::vec3 v2 = glm::vec3(vx - vertices[i * width + (j - 1)], vy - vertices[i * width + (j - 1) + 1], vz - vertices[i * width + (j - 1) + 2]);
+                glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
+                vertices.push_back(normal.x); //nx
+                vertices.push_back(normal.y); //ny
+                vertices.push_back(normal.z); //nz
+            }
+            else
+            {
+                vertices.push_back(0.0f); //nx
+                vertices.push_back(1.0f); //ny
+                vertices.push_back(0.0f); //nz
+            }
         }
     }
 
+    std::cout << "maxsize: " << vertices.max_size() << std::endl;
+    std::cout << "size: " << vertices.size() << std::endl;
   
 
     //freeup image data
@@ -221,13 +243,17 @@ int main()
 
     // Configure position attribute
  
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     
     // Configure texture coordinate attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    
+
+    // Configure texture coordinate attribute
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
 
     glGenBuffers(1, &terrainEBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
@@ -314,6 +340,7 @@ int main()
 
     objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
     lightningShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
+    terrainShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
     objectShaders.setVec3("lightPos", lightPositions[0]);
 
 
@@ -334,6 +361,8 @@ int main()
  
         //Draw terrain
         terrainShaders.use();
+        terrainShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
+        terrainShaders.setVec3("camPos", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
         
         glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -359,7 +388,7 @@ int main()
         int normCamZ = (camZ + width / 2.0f) * (float)width / width;
 
         // Find the corresponding vertex in the terrain data
-        int vertexIndex = 5 * (normCamX * width + normCamZ); // 5 because each vertex has 5 components (vx, vy, vz, u, v)
+        int vertexIndex = 8 * (normCamX * width + normCamZ); // 8 because each vertex has 8 components (vx, vy, vz, u, v, nx, xy, xz)
 
         // Get the height of the terrain at the camera's position
         float terrainHeight = vertices[vertexIndex + 1]; // +1 because vy is the second component
@@ -372,6 +401,7 @@ int main()
 
         // camera/view transformation
         camera.SetCameraHeight(terrainHeight + PLAYER_HEIGHT);
+        //camera.SetCameraHeight(12.0f);
         //std::cout << "camera height " << camera.GetHeight() << std::endl;
         glm::mat4 view = camera.GetViewMatrix();
         terrainShaders.setMat4("view", view);

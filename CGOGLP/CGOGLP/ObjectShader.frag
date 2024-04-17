@@ -58,8 +58,8 @@ vec4 SunLight(){
 
 	// outputs final color
 	//FragColor = texture(tex0, texCoord) * lightColor * (diffuse + ambient + specular);
-	FragColor = vec4(2.0f, 2.0f, 0.9f, 1.0f) * lightColor * (diffuse + ambient + specular);
-	return vec4(2.0f, 2.0f, 0.9f, 1.0f) * lightColor * (diffuse + ambient + specular);
+	//FragColor = vec4(0.0f, 0.0f, 0.9f, 1.0f) * lightColor * (diffuse + ambient + specular);
+	return vec4(0.0f, 0.0f, 0.9f, 1.0f) * lightColor * (diffuse + ambient + specular);
 
 }
 
