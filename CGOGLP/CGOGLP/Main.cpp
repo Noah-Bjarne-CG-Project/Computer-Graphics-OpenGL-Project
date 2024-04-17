@@ -34,6 +34,8 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
+
+
 //Cube -> veranderen naar sphere voor zon effect
 //As light source
 float verticesCube[] = {
@@ -87,6 +89,12 @@ glm::vec3 cubePositions[] = {
     glm::vec3(12.0f,  15.0f, -15.0f)
 };
 
+/*
+Licht wordt nu overal opgesmete vanboven met directional light. Aangezien enkel zon nu er is cv.
+Maar denk dat effectief meer licht bronnen toegevoegd moetten worden ik denk da enkel
+voor die lichtbronnen een array met licht posities nodig is, niet voor de zon want directional.
+
+*/
 glm::vec3 lightPositions[] = {
     glm::vec3(10.0f,  30.0f,  -10.0f)
 };

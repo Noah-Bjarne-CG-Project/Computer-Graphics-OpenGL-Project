@@ -8,6 +8,7 @@ in vec2 TexCoords;
 
 uniform sampler2D tex0;
 
+
 void main()
 {
     //Mess met specular light gaan werken in de toekomst voor mooier detail. maar pas wnr textures finalized zijn
