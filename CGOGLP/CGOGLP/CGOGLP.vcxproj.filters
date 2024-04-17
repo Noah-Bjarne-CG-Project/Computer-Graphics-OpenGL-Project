@@ -43,16 +43,22 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader.vert">
+    <None Include="ObjectShader.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="Shader.frag">
+    <None Include="ObjectShader.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="ShaderH.frag">
+    <None Include="TerrainShader.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
-    <None Include="ShaderH.vert">
+    <None Include="TerrainShader.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="LightShader.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="LightShader.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
   </ItemGroup>

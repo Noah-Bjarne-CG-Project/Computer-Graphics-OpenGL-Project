@@ -22,6 +22,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
 const float PLAYER_HEIGHT = 1.0f;
+const glm::vec4 LIGHTCOLLOR_SUN = glm::vec4(1.0f, 5.0f, 1.0f, 1.0f);
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -34,57 +35,61 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 //Cube
-//nog veranderen naar coordinaten systeem
-float verticesB[] = {
-       -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-       -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-       -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-       -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-       -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-       -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-       -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-       -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-       -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-       -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-       -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-       -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-       -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-       -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-       -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+//As light source
+float verticesCube[] = {
+    //      Coordinates       /    normals
+        -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f, 
+         0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f, 
+         0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f, 
+        -0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f, 
+        -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f, 
+  
+        -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f, 
+         0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f, 
+         0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f, 
+         0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f, 
+        -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f, 
+        -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f, 
+  
+        -0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f, 
+        -0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f, 
+        -0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f, 
+        -0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f, 
+        -0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f, 
+        -0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f, 
+  
+         0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f, 
+         0.5f,  0.5f, -0.5f,    1.0f,  0.0f,  0.0f, 
+         0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f, 
+         0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f, 
+         0.5f, -0.5f,  0.5f,    1.0f,  0.0f,  0.0f, 
+         0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f, 
+  
+        -0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f, 
+         0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f, 
+         0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f, 
+         0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f, 
+        -0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f, 
+        -0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f, 
+  
+        -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f, 
+         0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f, 
+         0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f, 
+         0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f, 
+        -0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f, 
+        -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f, 
 };
 
 // world space positions of our cubes
 glm::vec3 cubePositions[] = {
-    glm::vec3(0.0f,  0.0f,  0.0f),
-    glm::vec3(2.0f,  5.0f, -15.0f)
+    glm::vec3(10.0f,  18.0f,  -10.0f),
+    glm::vec3(12.0f,  15.0f, -15.0f)
 };
 
+glm::vec3 lightPositions[] = {
+    glm::vec3(10.0f,  30.0f,  -10.0f),
+};
 
 
 
@@ -121,7 +126,9 @@ int main()
     // Diepte buffer opengl
     glEnable(GL_DEPTH_TEST);
 
-    Shader shaders("ShaderH.vert", "ShaderH.frag");
+    Shader terrainShaders("TerrainShader.vert", "TerrainShader.frag");
+    Shader objectShaders("ObjectShader.vert", "ObjectShader.frag");
+    Shader lightningShaders("LightShader.vert", "LightShader.frag");
 
     // load height map texture
     int width, height, nrChannels;
@@ -196,19 +203,14 @@ int main()
 
     // Mess dit naar andere file/ apparte classes vor cleanup?
     //EBO = element array buffer
-    unsigned int VAO, VBO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    unsigned int terrainVAO, terrainVBO, terrainEBO;
+    glGenVertexArrays(1, &terrainVAO);
+    glBindVertexArray(terrainVAO);
 
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenBuffers(1, &terrainVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 
-    /*
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    */
     // Configure position attribute
  
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
@@ -219,8 +221,8 @@ int main()
     glEnableVertexAttribArray(1);
     
 
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glGenBuffers(1, &terrainEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned), &indices[0], GL_STATIC_DRAW);
 
     //shaders.use();
@@ -259,13 +261,55 @@ int main()
     stbi_image_free(bytes);
     glBindTexture(GL_TEXTURE_2D,0);
 
-    GLuint tex0Uni = glGetUniformLocation(shaders.ID, "tex0");
-    shaders.use();
+    GLuint tex0Uni = glGetUniformLocation(terrainShaders.ID, "tex0");
+    terrainShaders.use();
     glUniform1i(tex0Uni,0);
+
+    //lightning
+    unsigned int lightVAO, lightVBO, lightEBO;
+    glGenVertexArrays(1, &lightVAO);
+    glGenBuffers(1, &lightVBO);
+
+    glBindVertexArray(lightVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesCube), verticesCube, GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    lightningShaders.use();
+
+
+
+    //objects
+    unsigned int objectVAO, objectVBO, objectEBO;
+    glGenVertexArrays(1, &objectVAO);
+    glGenBuffers(1, &objectVBO);
+
+    glBindVertexArray(objectVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, objectVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesCube), verticesCube, GL_STATIC_DRAW);
+
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    objectShaders.use();
+
+
+    objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
+    lightningShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
+    objectShaders.setVec3("lightPos", lightPositions[0]);
 
 
     // render loop
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window)) //order: Terrain -> Lights -> Objects
     {
         //Time calcs
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -279,14 +323,16 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
-        shaders.use();
+        //Draw terrain
+        terrainShaders.use();
+        
         glBindTexture(GL_TEXTURE_2D, texture);
 
 
         //coordinaten systemen (projection, view,model)
         // pass projection matrix to shader (note that in this case it could change every frame)
         glm::mat4 projection = glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f); //fov, aspect ratio, dichts zichtbare en verst zichtbare
-        shaders.setMat4("projection", projection);
+        terrainShaders.setMat4("projection", projection);
 
         //Momenteel blokkerig maar wss oplosbaar
         //-------------------------------------------------------------- DIT OPRUIMEN LIKE IN FUNCTIE ZETTE OFZO NOG
@@ -319,15 +365,15 @@ int main()
         camera.SetCameraHeight(terrainHeight + PLAYER_HEIGHT);
         //std::cout << "camera height " << camera.GetHeight() << std::endl;
         glm::mat4 view = camera.GetViewMatrix();
-        shaders.setMat4("view", view);
+        terrainShaders.setMat4("view", view);
 
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
-        shaders.setMat4("model", model);
+        terrainShaders.setMat4("model", model);
 
 
         // draw mesh
-        glBindVertexArray(VAO);
+        glBindVertexArray(terrainVAO);
 
         //cool wiremesh thingy
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -340,8 +386,46 @@ int main()
                 (void*)(sizeof(unsigned) * (NUM_VERTS_PER_STRIP + 2) * strip)); // offset to starting index
         }
 
+        
+        //Draw Lights 
+        lightningShaders.use();
+        lightningShaders.setMat4("view", view);
+        lightningShaders.setMat4("model", model);
+        lightningShaders.setMat4("projection", projection);
 
-      
+        // render sun
+        glBindVertexArray(lightVAO);
+        // calculate the model matrix for each object and pass it to shader before drawing
+        glm::mat4 modelLight = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        modelLight = glm::translate(modelLight, lightPositions[0]);
+        lightningShaders.setMat4("model", modelLight);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        
+
+
+        //Draw objects
+        objectShaders.use();
+        objectShaders.setMat4("view", view);
+        objectShaders.setMat4("model", model);
+        objectShaders.setMat4("projection", projection);
+        objectShaders.setMat4("camMatrix", (view*projection));// dit nazien!!
+        
+        objectShaders.setVec3("camPos", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
+
+
+        // render boxes
+        glBindVertexArray(objectVAO);
+        for (unsigned int i = 0; i < cubePositions->length(); i++)
+        {
+            // calculate the model matrix for each object and pass it to shader before drawing
+            glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            objectShaders.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         //Swap buffers
         glfwSwapBuffers(window);
@@ -350,10 +434,15 @@ int main()
     }
 
     // cleanup
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &terrainVAO);
+    glDeleteBuffers(1, &terrainVBO);
+    glDeleteBuffers(1, &terrainEBO);
     glDeleteTextures(1, &texture);
+    glDeleteVertexArrays(1, &objectVAO);
+    glDeleteBuffers(1, &objectVBO);
+    glDeleteVertexArrays(1, &lightVAO);
+    glDeleteBuffers(1, &lightVBO);
+    glDeleteBuffers(1, &lightEBO);
 
     glfwTerminate();
     return 0;

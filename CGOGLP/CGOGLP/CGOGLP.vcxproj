@@ -141,10 +141,12 @@
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shader.frag" />
-    <None Include="Shader.vert" />
-    <None Include="ShaderH.frag" />
-    <None Include="ShaderH.vert" />
+    <None Include="LightShader.vert" />
+    <None Include="LightShader.frag" />
+    <None Include="ObjectShader.frag" />
+    <None Include="ObjectShader.vert" />
+    <None Include="TerrainShader.frag" />
+    <None Include="TerrainShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="grassy.jpg" />

@@ -17,7 +17,8 @@ void main()
     Height = aPos.y;
     Position = (view * model * vec4(aPos, 1.0f)).xyz;
     //Color = aColor;
-    Color = vec4(Height,Height,Height,1.0f);
+    float h = (Height + 16)/32.0f;     // shift and scale the height into a grayscale value
+    Color = vec4(h,h,h,1.0f);
     TexCoords = aTexCoords;
     gl_Position = projection * view * model * vec4(aPos, 1.0f);
 }
