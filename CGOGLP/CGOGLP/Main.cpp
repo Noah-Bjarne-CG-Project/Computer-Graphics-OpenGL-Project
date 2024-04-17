@@ -34,7 +34,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-//Cube
+//Cube -> veranderen naar sphere voor zon effect
 //As light source
 float verticesCube[] = {
     //      Coordinates       /    normals
