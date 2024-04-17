@@ -22,7 +22,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
 const float PLAYER_HEIGHT = 1.0f;
-const glm::vec4 LIGHTCOLLOR_SUN = glm::vec4(1.0f, 5.0f, 1.0f, 1.0f);
+const glm::vec4 LIGHTCOLLOR_SUN = glm::vec4(0.85f, 0.86f, 0.80f, 1.0f);
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -88,7 +88,7 @@ glm::vec3 cubePositions[] = {
 };
 
 glm::vec3 lightPositions[] = {
-    glm::vec3(10.0f,  30.0f,  -10.0f),
+    glm::vec3(10.0f,  30.0f,  -10.0f)
 };
 
 
@@ -278,6 +278,7 @@ int main()
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
     lightningShaders.use();
 
 
@@ -392,14 +393,20 @@ int main()
         lightningShaders.setMat4("view", view);
         lightningShaders.setMat4("model", model);
         lightningShaders.setMat4("projection", projection);
+        lightningShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
 
         // render sun
         glBindVertexArray(lightVAO);
-        // calculate the model matrix for each object and pass it to shader before drawing
-        glm::mat4 modelLight = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-        modelLight = glm::translate(modelLight, lightPositions[0]);
-        lightningShaders.setMat4("model", modelLight);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //lightPositions->length()
+        for (unsigned int i = 0; i < 1; i++)
+        {
+            // calculate the model matrix for each object and pass it to shader before drawing
+            glm::mat4 modelLight = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            modelLight = glm::translate(modelLight, lightPositions[i]);
+            lightningShaders.setMat4("model", modelLight);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         
 
 
@@ -411,6 +418,7 @@ int main()
         objectShaders.setMat4("camMatrix", (view*projection));// dit nazien!!
         
         objectShaders.setVec3("camPos", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
+        objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
 
 
         // render boxes
