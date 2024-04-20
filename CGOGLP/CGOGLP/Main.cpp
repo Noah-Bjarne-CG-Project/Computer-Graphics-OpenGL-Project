@@ -96,7 +96,8 @@ voor die lichtbronnen een array met licht posities nodig is, niet voor de zon wa
 
 */
 glm::vec3 lightPositions[] = {
-    glm::vec3(10.0f,  30.0f,  -10.0f)
+    glm::vec3(10.0f,  15.0f,  -10.0f),
+    glm::vec3(2.0f,  15.0f,  -2.0f)
 };
 
 
@@ -189,12 +190,14 @@ int main()
             vertices.push_back(texCoords[2 * (i * width + j)]);   // u
             vertices.push_back(texCoords[2 * (i * width + j) + 1]); // v
 
-            // calculate normals (Dit not niet 100% correct maar goed genoeg atm)
+            // calculate normals (Dit iets beter denk)
             if (i > 0 && j > 0 && i < height - 1 && j < width - 1)
             {
-                glm::vec3 v1 = glm::vec3(vx - vertices[(i - 1) * width + j], vy - vertices[(i - 1) * width + j + 1], vz - vertices[(i - 1) * width + j + 2]);
-                glm::vec3 v2 = glm::vec3(vx - vertices[i * width + (j - 1)], vy - vertices[i * width + (j - 1) + 1], vz - vertices[i * width + (j - 1) + 2]);
-                glm::vec3 normal = glm::normalize(glm::cross(v1, v2));
+                int index1 = ((i - 1) * width + j) * 8; // 8 because each vertex has 8 components (vx, vy, vz, u, v, nx, ny, nz)
+                int index2 = (i * width + (j - 1)) * 8;
+                glm::vec3 v1 = glm::vec3(vx - vertices[index1], vy - vertices[index1 + 1], vz - vertices[index1 + 2]);
+                glm::vec3 v2 = glm::vec3(vx - vertices[index2], vy - vertices[index2 + 1], vz - vertices[index2 + 2]);
+                glm::vec3 normal = glm::normalize(glm::cross( v2, v1));
                 vertices.push_back(normal.x); //nx
                 vertices.push_back(normal.y); //ny
                 vertices.push_back(normal.z); //nz
@@ -205,6 +208,7 @@ int main()
                 vertices.push_back(1.0f); //ny
                 vertices.push_back(0.0f); //nz
             }
+
         }
     }
 
