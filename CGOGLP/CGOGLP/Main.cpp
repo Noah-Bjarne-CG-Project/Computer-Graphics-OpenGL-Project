@@ -36,8 +36,7 @@ float lastFrame = 0.0f;
 
 
 
-//Cube -> veranderen naar sphere voor zon effect
-//As light source
+//Cube
 float verticesCube[] = {
     //      Coordinates       /    normals
         -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,
@@ -93,7 +92,6 @@ glm::vec3 cubePositions[] = {
 Licht wordt nu overal opgesmete vanboven met directional light. Aangezien enkel zon nu er is cv.
 Maar denk dat effectief meer licht bronnen toegevoegd moetten worden ik denk da enkel
 voor die lichtbronnen een array met licht posities nodig is, niet voor de zon want directional.
-
 */
 glm::vec3 lightPositions[] = {
     glm::vec3(10.0f,  15.0f,  -10.0f),
@@ -111,7 +109,6 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 
 	//Window
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Bjarne loves Jens xxx", NULL, NULL);
@@ -135,6 +132,7 @@ int main()
     // Diepte buffer opengl
     glEnable(GL_DEPTH_TEST);
 
+    //Loading shaders
     Shader terrainShaders("TerrainShader.vert", "TerrainShader.frag");
     Shader objectShaders("ObjectShader.vert", "ObjectShader.frag");
     Shader lightningShaders("LightShader.vert", "LightShader.frag");
@@ -153,7 +151,7 @@ int main()
     }
 
 
-    
+    //Uv coordinaten berekenen
     std::vector<float> texCoords;
     float repeat = 100.0f; // Adjust this value to change the number of times the texture repeats
     for (int i = 0; i < height; i++) {
@@ -212,9 +210,11 @@ int main()
         }
     }
 
+    //Voor debugging nog weg halen
     std::cout << "maxsize: " << vertices.max_size() << std::endl;
     std::cout << "size: " << vertices.size() << std::endl;
   
+    //mess extra uv array leegmaken voor data besparing
 
     //freeup image data
     stbi_image_free(data);
@@ -341,7 +341,7 @@ int main()
 
     objectShaders.use();
 
-
+    //uniform dingen initialiseren
     objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
     lightningShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
     terrainShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);

@@ -16,6 +16,7 @@ uniform sampler2D tex0;
 
 //Directional light. Licht van de zon (enigste nu)
 vec4 SunLight(){
+	//spectral map toevoegen maybe
 	// ambient lighting (mess in main zette)
 	float ambient = 0.20f;
 
