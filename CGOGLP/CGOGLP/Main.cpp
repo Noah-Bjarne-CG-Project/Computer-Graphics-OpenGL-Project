@@ -531,7 +531,8 @@ int main()
         glm::mat4 model1 = glm::mat4(1.0f);
         //height aanpassen op positie van waar die staat maar nu niet zo belangerijk
         model1 = glm::translate(model1, glm::vec3(-30.0f, 15.0f, 1.0f)); // translate it down so it's at the center of the scene
-        model1 = glm::scale(model1, glm::vec3(1.0f, 1.0f, 1.0f));	// it's still too big
+        model1 = glm::scale(model1, glm::vec3(1.0f, 1.0f, 1.0f));	// it's still too big (kleiner nr kleinre grootte)
+        model1 = glm::rotate(model1, glm::radians(90.0f),glm::vec3(0.0f, 1.0f, 0.0f)); //rotate (licht wordt precies nie mee gedraait)
         modelShaders.setMat4("model", model1);
         cartman.Draw(modelShaders);
         
