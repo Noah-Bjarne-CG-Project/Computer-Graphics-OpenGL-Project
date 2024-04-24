@@ -38,6 +38,38 @@ vec4 oldCodeWorking(){
 }
 //mess spotlight voor moest zaklamp toegevoegd worde idk
 
+//light with loss of intensity (4. belichting)
+vec4 PointLight(){ //Dit ook in terrain?
+
+	vec3 lightVec = lightPos - crntPos;
+	float dist = length(lightVec);
+	float a = 0.09f; //(mess in main zette )
+	float b = 0.07f; //(same as the above)
+	float intensity = 1.0f / (a * dist * dist + b *dist + 1.0f);
+
+	// ambient lighting (mess in main zette)
+	float ambient = 0.20f;
+
+	// diffuse lighting
+	vec3 normal = normalize(Normal);
+	vec3 lightDirection = normalize(lightVec);
+	float diffuse = max(dot(normal, lightDirection), 0.0f);
+
+	// specular lighting
+	float specularLight = 0.50f;
+	vec3 viewDirection = normalize(camPos - crntPos);
+	vec3 reflectionDirection = reflect(-lightDirection, normal);
+	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
+	float specular = specAmount * specularLight;
+
+	// outputs final color
+	//FragColor = texture(tex0, texCoord) * lightColor * (diffuse + ambient + specular);
+
+	//FragColor = vec4(0.0f, 0.0f, 0.9f, 1.0f) * lightColor * (diffuse + ambient + specular);
+
+	return vec4(0.0f, 0.0f, 0.9f, 1.0f) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+}
+
 
 //Directional light. Licht van de zon (enigste nu)
 vec4 SunLight(){
@@ -65,6 +97,8 @@ vec4 SunLight(){
 
 void main()
 {
-	FragColor = SunLight();
-
+	//FragColor = vec4(0.0f, 0.0f, 0.9f, 1.0f);
+	//FragColor = SunLight();
+	//FragColor = PointLight();
+	FragColor = PointLight()+SunLight();
 }
