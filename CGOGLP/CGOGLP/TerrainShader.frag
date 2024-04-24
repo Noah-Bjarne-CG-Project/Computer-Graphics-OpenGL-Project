@@ -13,12 +13,47 @@ in vec4 Color;
 uniform vec4 lightColor;
 uniform vec3 camPos;
 uniform sampler2D tex0;
+uniform int amountOfLights;
+uniform vec3 pointLightPoses[2];
+
+vec4 PointLight(vec3 lightningPos){
+
+	vec3 lightVec = lightningPos - crntPos;
+	float dist = length(lightVec);
+	float a = 0.09f; //(mess in main zette )
+	float b = 0.07f; //(same as the above)
+	float intensity = 1.0f / (a * dist * dist + b *dist + 1.0f);
+
+	// ambient lighting (mess in main zette)
+	float ambient = 0.00f;
+
+	// diffuse lighting
+	vec3 normal = normalize(Normal);
+	vec3 lightDirection = normalize(lightVec);
+	float diffuse = max(dot(normal, lightDirection), 0.0f);
+
+	// specular lighting
+	float specularLight = 0.50f;
+	vec3 viewDirection = normalize(camPos - crntPos);
+	vec3 reflectionDirection = reflect(-lightDirection, normal);
+	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
+	float specular = specAmount * specularLight;
+
+	// outputs final color
+	//FragColor = texture(tex0, texCoord) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+
+
+	//return vec4(0.0f, 0.0f, 0.9f, 1.0f) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+	return texture(tex0, TexCoords) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+
+}
+
 
 //Directional light. Licht van de zon (enigste nu)
 vec4 SunLight(){
 	//spectral map toevoegen maybe
 	// ambient lighting (mess in main zette)
-	float ambient = 0.20f;
+	float ambient = 0.10f;
 
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
@@ -26,7 +61,7 @@ vec4 SunLight(){
 	float diffuse = max(dot(normal, lightDirection), 0.0f);
 
 	// specular lighting
-	float specularLight = 0.50f;
+	float specularLight = 0.5f;
 	vec3 viewDirection = normalize(camPos - crntPos);
 	vec3 reflectionDirection = reflect(-lightDirection, normal);
 	float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
@@ -48,6 +83,11 @@ void main()
     //FragColor = Color * TexColor;
     //FragColor = texture(tex0,TexCoords);
 
-	FragColor = SunLight();
+	//FragColor = SunLight();
+	vec4 result = SunLight();
+	//vec4 result = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	for(int i = 0; i < 2; i++)
+        result += PointLight(pointLightPoses[i]);   
+	FragColor = result;
 
 }

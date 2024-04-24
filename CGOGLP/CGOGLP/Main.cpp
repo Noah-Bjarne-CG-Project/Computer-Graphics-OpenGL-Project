@@ -95,7 +95,7 @@ voor die lichtbronnen een array met licht posities nodig is, niet voor de zon wa
 */
 glm::vec3 lightPositions[] = {
     glm::vec3(10.0f,  15.0f,  -10.0f),
-    glm::vec3(20.0f,  15.0f,  25.0f)
+    glm::vec3(20.0f,  15.0f,  28.0f)
 };
 
 
@@ -350,6 +350,9 @@ int main()
     objectShaders.setInt("amountOfLights", lightPositions->length());
     objectShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
     objectShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+    terrainShaders.setInt("amountOfLights", lightPositions->length());
+    terrainShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
+    terrainShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
 
 
     // render loop
@@ -371,6 +374,11 @@ int main()
         terrainShaders.use();
         terrainShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
         terrainShaders.setVec3("camPos", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
+        
+        terrainShaders.setInt("amountOfLights", lightPositions->length());
+        terrainShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
+        terrainShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+        
         
         glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -465,11 +473,11 @@ int main()
         
         objectShaders.setVec3("camPos", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
         objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
-        /*
+        
         objectShaders.setInt("amountOfLights", lightPositions->length());
         objectShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
         objectShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
-        */
+        
 
 
         // render boxes
