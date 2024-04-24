@@ -345,7 +345,11 @@ int main()
     objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
     lightningShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
     terrainShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
-    objectShaders.setVec3("lightPos", lightPositions[0]);
+    //objectShaders.setVec3("lightPos", lightPositions[0]);
+    //point lights
+    objectShaders.setInt("amountOfLights", lightPositions->length());
+    objectShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
+    objectShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
 
 
     // render loop
@@ -461,6 +465,10 @@ int main()
         
         objectShaders.setVec3("camPos", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
         objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
+
+        objectShaders.setInt("amountOfLights", lightPositions->length());
+        objectShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
+        objectShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
 
 
         // render boxes

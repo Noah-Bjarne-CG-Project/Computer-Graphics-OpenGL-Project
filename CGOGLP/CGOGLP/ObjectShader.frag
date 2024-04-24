@@ -7,10 +7,11 @@ out vec4 FragColor;
 in vec3 Normal;
 in vec3 crntPos;
 
-
+//uniform vec3 lightPos;
 uniform vec4 lightColor;
-uniform vec3 lightPos;
 uniform vec3 camPos;
+uniform int amountOfLights;
+uniform vec3 pointLightPoses[2];
 
 //point light systeem toevoegen voor extra lichtbronnen in toekomst (standaard code nu)
 vec4 oldCodeWorking(){
@@ -19,7 +20,7 @@ vec4 oldCodeWorking(){
 
 	// diffuse lighting
 	vec3 normal = normalize(Normal);
-	vec3 lightDirection = normalize(lightPos - crntPos);
+	vec3 lightDirection = normalize(pointLightPoses[0] - crntPos);
 	float diffuse = max(dot(normal, lightDirection), 0.0f);
 
 	// specular lighting
@@ -39,9 +40,9 @@ vec4 oldCodeWorking(){
 //mess spotlight voor moest zaklamp toegevoegd worde idk
 
 //light with loss of intensity (4. belichting)
-vec4 PointLight(){ //Dit ook in terrain?
+vec4 PointLight(vec3 lightningPos){ //Dit ook in terrain?
 
-	vec3 lightVec = lightPos - crntPos;
+	vec3 lightVec = lightningPos - crntPos;
 	float dist = length(lightVec);
 	float a = 0.09f; //(mess in main zette )
 	float b = 0.07f; //(same as the above)
@@ -100,5 +101,11 @@ void main()
 	//FragColor = vec4(0.0f, 0.0f, 0.9f, 1.0f);
 	//FragColor = SunLight();
 	//FragColor = PointLight();
-	FragColor = PointLight()+SunLight();
+	//FragColor = PointLight()+SunLight();
+	vec4 result = SunLight();
+	for(int i = 0; i < amountOfLights; i++)
+        result += PointLight(pointLightPoses[i]);   
+	FragColor = result;
+
+	
 }
