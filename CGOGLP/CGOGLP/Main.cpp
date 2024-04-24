@@ -85,7 +85,7 @@ float verticesCube[] = {
 // world space positions of our cubes
 glm::vec3 cubePositions[] = {
     glm::vec3(10.0f,  18.0f,  -10.0f),
-    glm::vec3(12.0f,  15.0f, -15.0f)
+    glm::vec3(12.0f,  15.0f, -15.0f) // light at shadowy place for test
 };
 
 /*
@@ -95,7 +95,7 @@ voor die lichtbronnen een array met licht posities nodig is, niet voor de zon wa
 */
 glm::vec3 lightPositions[] = {
     glm::vec3(10.0f,  15.0f,  -10.0f),
-    glm::vec3(2.0f,  15.0f,  -2.0f)
+    glm::vec3(20.0f,  15.0f,  25.0f)
 };
 
 
@@ -444,7 +444,7 @@ int main()
         // render sun
         glBindVertexArray(lightVAO);
         //lightPositions->length()
-        for (unsigned int i = 0; i < 1; i++)
+        for (unsigned int i = 0; i < 2; i++)
         {
             // calculate the model matrix for each object and pass it to shader before drawing
             glm::mat4 modelLight = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
@@ -465,10 +465,11 @@ int main()
         
         objectShaders.setVec3("camPos", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
         objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
-
+        /*
         objectShaders.setInt("amountOfLights", lightPositions->length());
         objectShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
         objectShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+        */
 
 
         // render boxes
