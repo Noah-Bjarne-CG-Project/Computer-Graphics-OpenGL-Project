@@ -141,6 +141,7 @@ int main()
     Shader terrainShaders("TerrainShader.vert", "TerrainShader.frag");
     Shader objectShaders("ObjectShader.vert", "ObjectShader.frag");
     Shader lightningShaders("LightShader.vert", "LightShader.frag");
+    Shader modelShaders("ModelShader.vert", "ModelShader.frag");
 
     // load height map texture
     int width, height, nrChannels;
@@ -360,9 +361,18 @@ int main()
     objectShaders.setInt("amountOfLights", lightPositions->length());
     objectShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
     objectShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+
+    
     terrainShaders.setInt("amountOfLights", lightPositions->length());
     terrainShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
     terrainShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+
+    modelShaders.use();
+    modelShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
+    modelShaders.setInt("amountOfLights", lightPositions->length());
+    modelShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
+    modelShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+
 
 
     // render loop
@@ -507,12 +517,23 @@ int main()
         //render models
         //SHADERS MAKEEEEE
         
+        modelShaders.use();
+        modelShaders.setMat4("model", model);
+        modelShaders.setMat4("camMatrix", (view * projection));
+        modelShaders.setMat4("view", view);
+        modelShaders.setMat4("projection", projection);
+        modelShaders.setVec3("camPos", glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z));
+        modelShaders.setInt("amountOfLights", lightPositions->length());
+        modelShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
+        modelShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+        
         // render the loaded model
         glm::mat4 model1 = glm::mat4(1.0f);
-        model1 = glm::translate(model1, glm::vec3(0.0f, 15.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model1 = glm::scale(model1, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-        objectShaders.setMat4("model", model1);
-        cartman.Draw(objectShaders);
+        //height aanpassen op positie van waar die staat maar nu niet zo belangerijk
+        model1 = glm::translate(model1, glm::vec3(-30.0f, 15.0f, 1.0f)); // translate it down so it's at the center of the scene
+        model1 = glm::scale(model1, glm::vec3(1.0f, 1.0f, 1.0f));	// it's still too big
+        modelShaders.setMat4("model", model1);
+        cartman.Draw(modelShaders);
         
 
 
