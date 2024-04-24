@@ -22,6 +22,9 @@
     <Filter Include="Resource Files\Heightmaps">
       <UniqueIdentifier>{2991c517-a4c2-4db2-b96f-aa9282f2f789}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Models">
+      <UniqueIdentifier>{b8883ca3-6195-48d2-8de4-b3e175bf5e47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -32,13 +35,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Shader_ogl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -63,22 +69,22 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="iceland_heightmap.png">
-      <Filter>Resource Files\Heightmaps</Filter>
-    </Image>
-    <Image Include="wall.jpg">
+    <Image Include="Resources\Textures\grassy.jpg">
       <Filter>Resource Files\Textures</Filter>
     </Image>
-    <Image Include="grassy.jpg">
+    <Image Include="Resources\Textures\grassy2.jpg">
       <Filter>Resource Files\Textures</Filter>
     </Image>
-    <Image Include="squareheightmap.png">
+    <Image Include="Resources\Textures\stupid.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\wall.jpg">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Heightmaps\iceland_heightmap.png">
       <Filter>Resource Files\Heightmaps</Filter>
     </Image>
-    <Image Include="grassy2.jpg">
-      <Filter>Resource Files\Heightmaps</Filter>
-    </Image>
-    <Image Include="stupid.jpg">
+    <Image Include="Resources\Heightmaps\squareheightmap.png">
       <Filter>Resource Files\Heightmaps</Filter>
     </Image>
   </ItemGroup>

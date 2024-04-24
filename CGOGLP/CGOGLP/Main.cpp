@@ -7,10 +7,15 @@
 
 #include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "Model.h"
+
+//is momenteel in model.h PAS OP MAG MAAR 1 KEER TOEGEVOEGD WORDEN ANDERS BIG PROBLEM
+//#define STB_IMAGE_IMPLEMENTATION
+//#include <stb/stb_image.h>
+
 
 #include <vector>
+
 
 //Functions
 void inputProcessor(GLFWwindow* window);
@@ -139,7 +144,7 @@ int main()
 
     // load height map texture
     int width, height, nrChannels;
-    unsigned char* data = stbi_load("iceland_heightmap.png", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("Resources/Heightmaps/iceland_heightmap.png", &width, &height, &nrChannels, 0);
     if (data)
     {
         std::cout << "Loaded heightmap of size " << height << " x " << width <<" nr channels: "<< nrChannels << std::endl;
@@ -267,7 +272,7 @@ int main()
 
     //Texture
     int widthImg, heigthImg, numColCh;
-    unsigned char* bytes = stbi_load("grassy2.jpg", &widthImg, &heigthImg, &numColCh, 0);
+    unsigned char* bytes = stbi_load("Resources/Textures/grassy2.jpg", &widthImg, &heigthImg, &numColCh, 0);
     if (bytes)
     {
         std::cout << "Loaded himage " << height << " x " << width << std::endl;
@@ -340,6 +345,11 @@ int main()
     glEnableVertexAttribArray(1);
 
     objectShaders.use();
+
+    // load models
+    // -----------
+    Model cartman("Resources/Models/Cartman/cartman.obj");//kleine reminder, vond dll niet. opgtelost me env path maar mess toch in vs oplossen
+
 
     //uniform dingen initialiseren
     objectShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
@@ -493,6 +503,19 @@ int main()
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        //render models
+        //SHADERS MAKEEEEE
+        
+        // render the loaded model
+        glm::mat4 model1 = glm::mat4(1.0f);
+        model1 = glm::translate(model1, glm::vec3(0.0f, 15.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model1 = glm::scale(model1, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        objectShaders.setMat4("model", model1);
+        cartman.Draw(objectShaders);
+        
+
+
 
         //Swap buffers
         glfwSwapBuffers(window);

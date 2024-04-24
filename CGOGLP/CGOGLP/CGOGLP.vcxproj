@@ -108,11 +108,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>S:\vslibsenz\Includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,8 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Shader_ogl.h" />
-    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LightShader.vert" />
@@ -149,12 +151,12 @@
     <None Include="TerrainShader.vert" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="grassy.jpg" />
-    <Image Include="grassy2.jpg" />
-    <Image Include="iceland_heightmap.png" />
-    <Image Include="squareheightmap.png" />
-    <Image Include="stupid.jpg" />
-    <Image Include="wall.jpg" />
+    <Image Include="Resources\Heightmaps\iceland_heightmap.png" />
+    <Image Include="Resources\Heightmaps\squareheightmap.png" />
+    <Image Include="Resources\Textures\grassy.jpg" />
+    <Image Include="Resources\Textures\grassy2.jpg" />
+    <Image Include="Resources\Textures\stupid.jpg" />
+    <Image Include="Resources\Textures\wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
