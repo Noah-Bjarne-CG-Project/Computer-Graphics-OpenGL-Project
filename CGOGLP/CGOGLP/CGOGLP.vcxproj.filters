@@ -47,6 +47,9 @@
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ObjectShader.vert">
@@ -73,6 +76,8 @@
     <None Include="ModelShader.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="Skybox.frag" />
+    <None Include="Skybox.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\grassy.jpg">
@@ -93,5 +98,10 @@
     <Image Include="Resources\Heightmaps\squareheightmap.png">
       <Filter>Resource Files\Heightmaps</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="CGOGLP.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
