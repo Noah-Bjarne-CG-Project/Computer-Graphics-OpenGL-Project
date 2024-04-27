@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "glm/ext.hpp"
 
 #include <iostream>
 
@@ -21,6 +22,7 @@
 void inputProcessor(GLFWwindow* window);
 void mouse_movement(GLFWwindow* window, double xposIn, double yposIn);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+unsigned int loadCubemap(vector<std::string> faces);
 
 
 //Settings
@@ -87,6 +89,42 @@ float verticesCube[] = {
         -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f, 
 };
 
+float skyboxVertices[] =
+{
+    //   Coordinates
+    -1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f
+};
+
+unsigned int skyboxIndices[] =
+{
+    // Right
+    1, 2, 6,
+    6, 5, 1,
+    // Left
+    0, 4, 7,
+    7, 3, 0,
+    // Top
+    4, 5, 6,
+    6, 7, 4,
+    // Bottom
+    0, 3, 2,
+    2, 1, 0,
+    // Back
+    0, 1, 5,
+    5, 4, 0,
+    // Front
+    3, 7, 6,
+    6, 2, 3
+};
+
+
 // world space positions of our cubes
 glm::vec3 cubePositions[] = {
     glm::vec3(10.0f,  18.0f,  -10.0f),
@@ -107,6 +145,8 @@ glm::vec3 lightPositions[] = {
 
 int main()
 {
+
+
     //configure glfw
     glfwInit();
 
@@ -142,6 +182,19 @@ int main()
     Shader objectShaders("ObjectShader.vert", "ObjectShader.frag");
     Shader lightningShaders("LightShader.vert", "LightShader.frag");
     Shader modelShaders("ModelShader.vert", "ModelShader.frag");
+    Shader skyboxShader("Skybox.vert", "Skybox.frag");
+    std::vector<std::string> faces
+    {
+        "Resources/Skybox/right.jpg",
+        "Resources/Skybox/left.jpg",
+        "Resources/Skybox/top.jpg",
+        "Resources/Skybox/bottom.jpg",
+        "Resources/Skybox/front.jpg",
+        "Resources/Skybox/back.jpg"
+    };
+    unsigned int cubemapTexture = loadCubemap(faces);
+
+
 
     // load height map texture
     int width, height, nrChannels;
@@ -374,6 +427,28 @@ int main()
     modelShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
 
 
+    skyboxShader.use();
+    glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
+
+    unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glGenBuffers(1, &skyboxEBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    
+
+
+
 
     // render loop
     while (!glfwWindowShouldClose(window)) //order: Terrain -> Lights -> Objects
@@ -535,9 +610,28 @@ int main()
         model1 = glm::rotate(model1, glm::radians(90.0f),glm::vec3(0.0f, 1.0f, 0.0f)); //rotate (licht wordt precies nie mee gedraait)
         modelShaders.setMat4("model", model1);
         cartman.Draw(modelShaders);
+
+        glDepthFunc(GL_LEQUAL);
+
+        skyboxShader.use();
         
 
+        view = glm::mat4(1.0f);
+        projection = glm::mat4(1.0f);
+        // We make the mat4 into a mat3 and then a mat4 again in order to get rid of the last row and column
+        // The last row and column affect the translation of the skybox (which we don't want to affect)
+        view = glm::mat4(glm::mat3(glm::lookAt(camera.Position, camera.Position + camera.Pitch, camera.Up)));
+        projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100.0f);
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+        glDepthFunc(GL_LESS);
 
         //Swap buffers
         glfwSwapBuffers(window);
@@ -559,6 +653,38 @@ int main()
     glfwTerminate();
     return 0;
 
+}
+
+unsigned int loadCubemap(vector<std::string> faces)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
+            stbi_image_free(data);
+        }
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+    return textureID;
 }
 
 
