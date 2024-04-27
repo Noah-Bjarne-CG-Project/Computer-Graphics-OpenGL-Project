@@ -23,6 +23,9 @@ void inputProcessor(GLFWwindow* window);
 void mouse_movement(GLFWwindow* window, double xposIn, double yposIn);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 unsigned int loadCubemap(vector<std::string> faces);
+glm::vec3 calculateRayDirection( const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
+void terrainHeightEdditor(float x, float z, int height, int width);
+glm::vec3 calculateRayTerrainIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, int width, int height);
 
 
 //Settings
@@ -40,7 +43,6 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
-
 
 
 //Cube
@@ -126,9 +128,9 @@ unsigned int skyboxIndices[] =
 
 
 // world space positions of our cubes
-glm::vec3 cubePositions[] = {
-    glm::vec3(10.0f,  18.0f,  -10.0f),
-    glm::vec3(12.0f,  15.0f, -15.0f) // light at shadowy place for test
+std::vector <glm::vec3> cubePositions = {
+        glm::vec3(10.0f,  18.0f,  -10.0f),
+        glm::vec3(12.0f,  15.0f, -15.0f)
 };
 
 /*
@@ -138,9 +140,10 @@ voor die lichtbronnen een array met licht posities nodig is, niet voor de zon wa
 */
 glm::vec3 lightPositions[] = {
     glm::vec3(10.0f,  15.0f,  -10.0f),
-    glm::vec3(20.0f,  15.0f,  28.0f)
+    glm::vec3(20.0f,  15.0f,  28.0f)// light at shadowy place for test
 };
 
+std::vector<float> vertices;
 
 
 int main()
@@ -224,7 +227,7 @@ int main()
 
 
     // vertex generation
-    std::vector<float> vertices;
+    
     float yScale = 64.0f / 256.0f, yShift = 16.0f;  // apply a scale+shift to the height data
     int rez = 1;
     unsigned bytePerPixel = nrChannels;
@@ -426,6 +429,7 @@ int main()
     modelShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
     modelShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
 
+    
 
     skyboxShader.use();
     glUniform1i(glGetUniformLocation(skyboxShader.ID, "skybox"), 0);
@@ -450,6 +454,8 @@ int main()
 
 
 
+
+    int counter = 0;
     // render loop
     while (!glfwWindowShouldClose(window)) //order: Terrain -> Lights -> Objects
     {
@@ -577,7 +583,7 @@ int main()
 
         // render boxes
         glBindVertexArray(objectVAO);
-        for (unsigned int i = 0; i < cubePositions->length(); i++)
+        for (unsigned int i = 0; i < cubePositions.size(); i++)
         {
             // calculate the model matrix for each object and pass it to shader before drawing
             glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
@@ -713,6 +719,39 @@ void inputProcessor(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera.ProcessKeyboard(RIGHT, shift, deltaTime);
     }
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        std::cout << "Mouse left" << std::endl;
+
+        glm::vec3 aaaa = calculateRayDirection( glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f),camera.GetViewMatrix());
+        glm::vec3 bbbb = calculateRayTerrainIntersection(camera.Position, aaaa, 1756, 2624);
+        //std::cout << " x:" << aaaa.x << " y:" << aaaa.y << " z:"<< aaaa.z << std::endl;
+        std::cout << " x:" << bbbb.x << " y:" << bbbb.y << " z:"<< bbbb.z << std::endl;
+        //width and heigth of terrain file
+        //terrainHeightEdditor(aaaa.x, aaaa.z,1756,2624);
+        //cubePositions.push_back(glm::vec3(bbbb.x , bbbb.y, bbbb.z));
+        cubePositions.push_back(glm::vec3(bbbb.x, bbbb.y, bbbb.z));
+        std::cout << " size of thingy" << cubePositions.size() << std::endl;
+    }
+}
+
+void terrainHeightEdditor(float x, float z, int height, int width) {
+
+    /* PRINT ALS DEBUG MODE ME VARIABEL? OF TEVEEL INPAKT OP SYSTEEM?
+    std::cout << "camX? " << camX << std::endl;
+    std::cout << "camY? " << camZ << std::endl;
+    */
+
+    // Normalize the camera's position to the range of the terrain
+    int normX = (x + height / 2.0f) * (float)height / height;
+    int normZ = (z + width / 2.0f) * (float)width / width;
+
+    // Find the corresponding vertex in the terrain data
+    int vertexIndex = 8 * (normX * width + normZ); // 8 because each vertex has 8 components (vx, vy, vz, u, v, nx, xy, xz)
+
+    // Get the height of the terrain at the camera's position
+    //float terrainHeight = vertices[vertexIndex + 1];
+    vertices[vertexIndex + 1] += 2.0f;
+
 }
 
 void mouse_movement(GLFWwindow* window, double xposIn, double yposIn)
@@ -741,3 +780,75 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
+
+glm::vec3 calculateRayDirection(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
+    
+    // altijd midde van scherm
+    float x = 0.0f;
+    float y = 0.0f;
+
+    // Apply perspective and view transformations
+    glm::vec4 rayClip = glm::vec4(x, y, -1.0f, 1.0f);
+    glm::vec4 rayEye = glm::inverse(projectionMatrix) * rayClip;
+    rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+    glm::vec4 rayWorld = glm::inverse(viewMatrix) * rayEye;
+
+    // Normalize the direction vector
+    glm::vec3 rayDir = glm::normalize(glm::vec3(rayWorld));
+    return rayDir;
+    
+}
+
+glm::vec3 calculateRayTerrainIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirection,  int height,int width ) {
+    float t = 0.0f;
+    float tStep = 0.1f; // You can adjust this value based on your needs
+    float MAX_RAYCAST_DISTANCE = 100.0f;
+
+    glm::vec3 currentPoint = rayOrigin;
+
+    // Step along the ray until we find an intersection with the terrain
+    while (true) {
+        currentPoint += rayDirection * tStep;
+        t += tStep;
+
+        // Calculate the indices of the vertices that form the square that the current point is in
+        int xIndex = (currentPoint.x + height / 2.0f) * (float)height / height;
+        int zIndex = (currentPoint.z + width / 2.0f) * (float)width / width;
+        int xIndex2 = ((currentPoint.x+0.5f) + height / 2.0f) * (float)height / height;
+        int zIndex2 = (currentPoint.z + width / 2.0f) * (float)width / width;
+        int xIndex3 = (currentPoint.x + height / 2.0f) * (float)height / height;
+        int zIndex3 = ((currentPoint.z+0.5f) + width / 2.0f) * (float)width / width;
+        int xIndex4 = ((currentPoint.x+0.5f) + height / 2.0f) * (float)height / height;
+        int zIndex4 = ((currentPoint.z+0.5f) + width / 2.0f) * (float)width / width;
+
+        if (xIndex < 0 || xIndex >= width - 1 || zIndex < 0 || zIndex >= height - 1) {
+            // The current point is outside the terrain
+            std::cout << " The current point is outside the terrain"  << std::endl;
+            break;
+        }
+
+        // Get the heights of the four corners of the square
+        float height1 = vertices[(xIndex * width + zIndex) * 8 + 1]; // 8 because each vertex has 8 components (vx, vy, vz, u, v, nx, ny, nz)
+        float height2 = vertices[(xIndex2 * width + zIndex2) * 8 + 1];
+        float height3 = vertices[(xIndex3 * width + zIndex3) * 8 + 1];
+        float height4 = vertices[(xIndex4 * width + zIndex4) * 8 + 1];
+
+        // Interpolate the height at the current point
+        float heightAtCurrentPoint = (height1 + height2 + height3 + height4) / 4.0f;
+
+        if (currentPoint.y <= heightAtCurrentPoint) {
+            // We've hit the terrain
+            currentPoint.y = heightAtCurrentPoint;
+            return currentPoint;
+        }
+
+        if (t >= MAX_RAYCAST_DISTANCE) {
+            // We've gone too far without hitting anything
+            break;
+        }
+    }
+
+    // No intersection found
+    return glm::vec3(0.0f);
+}
+
