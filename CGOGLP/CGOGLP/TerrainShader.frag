@@ -13,8 +13,14 @@ in vec4 Color;
 uniform vec4 lightColor;
 uniform vec3 camPos;
 uniform sampler2D tex0;
+uniform sampler2D tex1;
+uniform sampler2D tex2;
+uniform sampler2D tex3;
 uniform int amountOfLights;
 uniform vec3 pointLightPoses[2];
+uniform float heigth0;
+uniform float heigth1;
+uniform float heigth2;
 
 vec4 PointLight(vec3 lightningPos){
 
@@ -44,7 +50,16 @@ vec4 PointLight(vec3 lightningPos){
 
 
 	//return vec4(0.0f, 0.0f, 0.9f, 1.0f) * lightColor * (diffuse * intensity + ambient + specular * intensity);
-	return texture(tex0, TexCoords) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+	if (Height < heigth0){
+		return texture(tex2, TexCoords) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+	}else if (Height < heigth1){
+		return texture(tex0, TexCoords) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+	}else if (Height < heigth2){
+		return texture(tex3, TexCoords) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+	}else{
+		return texture(tex1, TexCoords) * lightColor * (diffuse * intensity + ambient + specular * intensity);
+	}
+	
 
 }
 
@@ -70,7 +85,16 @@ vec4 SunLight(){
 	// outputs final color
 	//FragColor = texture(tex0, TexCoords) * lightColor * (diffuse + ambient + specular);
 	//FragColor = vec4(2.0f, 2.0f, 0.9f, 1.0f) * lightColor * (diffuse + ambient + specular);
-	return  texture(tex0, TexCoords) * lightColor * (diffuse + ambient + specular);
+	if (Height < heigth0){
+		return  texture(tex2, TexCoords) * lightColor * (diffuse + ambient + specular);
+	}else if (Height < heigth1){
+		return  texture(tex0, TexCoords) * lightColor * (diffuse + ambient + specular);
+	}else if (Height < heigth2){
+		return  texture(tex3, TexCoords) * lightColor * (diffuse + ambient + specular);
+	}else{
+		return  texture(tex1, TexCoords) * lightColor * (diffuse + ambient + specular);
+	}
+	
 
 }
 

@@ -227,6 +227,7 @@ int main()
 
 
     // vertex generation
+    float lowestPoint = 100.0f, heighestPoint = 0.0f;
     
     float yScale = 64.0f / 256.0f, yShift = 16.0f;  // apply a scale+shift to the height data
     int rez = 1;
@@ -245,6 +246,13 @@ int main()
             vertices.push_back(vx);   // vx
             vertices.push_back(vy);   // vy
             vertices.push_back(vz);   // vz
+
+            if (vy > heighestPoint) {
+                heighestPoint = vy;
+            }
+            if (vy < lowestPoint) {
+                lowestPoint = vy;
+            }
 
             // texture coordinates
             vertices.push_back(texCoords[2 * (i * width + j)]);   // u
@@ -327,7 +335,7 @@ int main()
 
     //shaders.use();
 
-    //Texture
+    //Texture grass
     int widthImg, heigthImg, numColCh;
     unsigned char* bytes = stbi_load("Resources/Textures/grassy2.jpg", &widthImg, &heigthImg, &numColCh, 0);
     if (bytes)
@@ -364,6 +372,120 @@ int main()
     GLuint tex0Uni = glGetUniformLocation(terrainShaders.ID, "tex0");
     terrainShaders.use();
     glUniform1i(tex0Uni,0);
+
+    //Texture snow
+    int widthImga, heigthImga, numColCha;
+    unsigned char* bytesSnow = stbi_load("Resources/Textures/snowy.jpg", &widthImga, &heigthImga, &numColCha, 0);
+    if (bytesSnow)
+    {
+        std::cout << "Loaded SNOW " << height << " x " << width << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+
+    GLuint textureSnow;
+    glGenTextures(1, &textureSnow);
+    //soort van texture array gedoe
+    glActiveTexture(GL_TEXTURE1); // texture 1 = snow
+    glBindTexture(GL_TEXTURE_2D, textureSnow);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    //gl repear gedoe is per axis ingesteld
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //GL_RGB = jpg -> GL_RGBA = png
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImga, heigthImga, 0, GL_RGB, GL_UNSIGNED_BYTE, bytesSnow);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(bytesSnow);
+    glBindTexture(GL_TEXTURE_2D, 1);
+
+    GLuint tex1Uni = glGetUniformLocation(terrainShaders.ID, "tex1");
+    terrainShaders.use();
+    glUniform1i(tex1Uni, 1);
+
+    //Texture Sand
+    int widthImgs, heigthImgs, numColChs;
+    unsigned char* bytesSand = stbi_load("Resources/Textures/sandy.jpg", &widthImgs, &heigthImgs, &numColChs, 0);
+    if (bytesSand)
+    {
+        std::cout << "Loaded sand " << height << " x " << width << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+
+    GLuint textureSand;
+    glGenTextures(1, &textureSand);
+    //soort van texture array gedoe
+    glActiveTexture(GL_TEXTURE2); // texture 2 =Sand
+    glBindTexture(GL_TEXTURE_2D, textureSand);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    //gl repear gedoe is per axis ingesteld
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //GL_RGB = jpg -> GL_RGBA = png
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImgs, heigthImgs, 0, GL_RGB, GL_UNSIGNED_BYTE, bytesSand);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(bytesSand);
+    glBindTexture(GL_TEXTURE_2D, 2);
+
+    GLuint tex2Uni = glGetUniformLocation(terrainShaders.ID, "tex2");
+    terrainShaders.use();
+    glUniform1i(tex2Uni, 2);
+
+    //Texture stone
+    int widthImgb, heigthImgb, numColChb;
+    unsigned char* bytesStone = stbi_load("Resources/Textures/stone.jpg", &widthImgb, &heigthImgb, &numColChb, 0);
+    if (bytesStone)
+    {
+        std::cout << "Loaded Stone " << height << " x " << width << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return -1;
+    }
+
+    GLuint textureStone;
+    glGenTextures(1, &textureStone);
+    //soort van texture array gedoe
+    glActiveTexture(GL_TEXTURE3); // texture 3 = stone
+    glBindTexture(GL_TEXTURE_2D, textureStone);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    //gl repear gedoe is per axis ingesteld
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //GL_RGB = jpg -> GL_RGBA = png
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImgb, heigthImgb, 0, GL_RGB, GL_UNSIGNED_BYTE, bytesStone);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(bytesStone);
+    glBindTexture(GL_TEXTURE_2D, 3);
+
+    GLuint tex3Uni = glGetUniformLocation(terrainShaders.ID, "tex3");
+    terrainShaders.use();
+    glUniform1i(tex3Uni, 3);
 
     //lightning
     unsigned int lightVAO, lightVBO, lightEBO;
@@ -422,6 +544,11 @@ int main()
     terrainShaders.setInt("amountOfLights", lightPositions->length());
     terrainShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
     terrainShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+    float heigthcalc = (heighestPoint - lowestPoint) / 4; //want 4 textures
+    terrainShaders.setFloat("heigth0", 25.0f);
+    terrainShaders.setFloat("heigth1", lowestPoint + (heigthcalc*2));
+    terrainShaders.setFloat("heigth2", lowestPoint + (heigthcalc * 3));
+    
 
     modelShaders.use();
     modelShaders.setVec4("lightColor", LIGHTCOLLOR_SUN);
@@ -479,9 +606,21 @@ int main()
         terrainShaders.setInt("amountOfLights", lightPositions->length());
         terrainShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
         terrainShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
+        terrainShaders.setFloat("heigth0", lowestPoint + heigthcalc);
+        terrainShaders.setFloat("heigth1", lowestPoint + (heigthcalc * 2));
+        terrainShaders.setFloat("heigth2", lowestPoint + (heigthcalc * 3));
         
-        
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, textureSnow);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, textureSand);
+
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, textureStone);
 
 
         //coordinaten systemen (projection, view,model)
@@ -632,7 +771,7 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(skyboxShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
+        //glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawElements(GL_TRIANGLES, 64, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);

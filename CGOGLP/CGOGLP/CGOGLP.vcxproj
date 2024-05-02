@@ -164,6 +164,9 @@
     <Image Include="Resources\Heightmaps\squareheightmap.png" />
     <Image Include="Resources\Textures\grassy.jpg" />
     <Image Include="Resources\Textures\grassy2.jpg" />
+    <Image Include="Resources\Textures\sandy.jpg" />
+    <Image Include="Resources\Textures\snowy.jpg" />
+    <Image Include="Resources\Textures\stone.jpg" />
     <Image Include="Resources\Textures\stupid.jpg" />
     <Image Include="Resources\Textures\wall.jpg" />
   </ItemGroup>
