@@ -148,6 +148,8 @@
     <ClInclude Include="Shader_ogl.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="2dshader.frag" />
+    <None Include="2dshader.vert" />
     <None Include="LightShader.vert" />
     <None Include="LightShader.frag" />
     <None Include="ModelShader.frag" />

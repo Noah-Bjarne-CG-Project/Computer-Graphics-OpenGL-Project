@@ -82,6 +82,12 @@
     <None Include="Skybox.vert">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="2dshader.vert">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
+    <None Include="2dshader.frag">
+      <Filter>Resource Files\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\grassy.jpg">

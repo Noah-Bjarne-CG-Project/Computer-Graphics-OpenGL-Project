@@ -26,7 +26,7 @@ unsigned int loadCubemap(vector<std::string> faces);
 glm::vec3 calculateRayDirection( const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
 void terrainHeightEdditor(float x, float z, int height, int width);
 glm::vec3 calculateRayTerrainIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, int width, int height);
-
+void drawCrosshair();
 
 //Settings
 const int WINDOW_WIDTH = 1280;
@@ -777,6 +777,7 @@ int main()
         glBindVertexArray(0);
 
         glDepthFunc(GL_LESS);
+        drawCrosshair();
 
         //Swap buffers
         glfwSwapBuffers(window);
@@ -989,5 +990,49 @@ glm::vec3 calculateRayTerrainIntersection(const glm::vec3& rayOrigin, const glm:
 
     // No intersection found
     return glm::vec3(0.0f);
+}
+
+// Draw crosshair
+void drawCrosshair() {
+    // Define the vertices for the lines
+
+    float aspectRatio = WINDOW_WIDTH / WINDOW_HEIGHT;
+
+    float lineLength = 0.05f; // Define the desired length of the lines (adjust as needed)
+
+    float crosshairVertices[] = {
+        // Horizontal line
+        -lineLength * WINDOW_HEIGHT / 1500, 0.0f, 0.0f,  // start point
+        lineLength* WINDOW_HEIGHT / 1500, 0.0f, 0.0f,   // end point
+        // Vertical line
+        0.0f, -lineLength * WINDOW_WIDTH / 1500  , 0.0f,  // start point
+        0.0f, lineLength* WINDOW_WIDTH / 1500, 0.0f    // end point
+    };
+
+
+    // Create and bind a VAO (Vertex Array Object) and VBO (Vertex Buffer Object) for the crosshair
+    unsigned int crosshairVAO, crosshairVBO;
+    glGenVertexArrays(1, &crosshairVAO);
+    glGenBuffers(1, &crosshairVBO);
+    glBindVertexArray(crosshairVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, crosshairVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(crosshairVertices), crosshairVertices, GL_STATIC_DRAW);
+    // Set the attribute pointers
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Use a simple shader for rendering the crosshair
+    // You might need to adjust this shader according to your shader setup
+    Shader crosshairShader("2dshader.vert", "2dshader.frag");
+    crosshairShader.use();
+
+    // Draw the crosshair
+    glBindVertexArray(crosshairVAO);
+    glDrawArrays(GL_LINES, 0, 4);
+    glBindVertexArray(0);
+
+    // Clean up
+    glDeleteVertexArrays(1, &crosshairVAO);
+    glDeleteBuffers(1, &crosshairVBO);
 }
 
