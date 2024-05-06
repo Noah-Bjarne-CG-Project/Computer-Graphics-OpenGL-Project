@@ -996,8 +996,6 @@ glm::vec3 calculateRayTerrainIntersection(const glm::vec3& rayOrigin, const glm:
 void drawCrosshair() {
     // Define the vertices for the lines
 
-    float aspectRatio = WINDOW_WIDTH / WINDOW_HEIGHT;
-
     float lineLength = 0.05f; // Define the desired length of the lines (adjust as needed)
 
     float crosshairVertices[] = {
@@ -1028,6 +1026,7 @@ void drawCrosshair() {
 
     // Draw the crosshair
     glBindVertexArray(crosshairVAO);
+    glLineWidth(2.0f);
     glDrawArrays(GL_LINES, 0, 4);
     glBindVertexArray(0);
 
