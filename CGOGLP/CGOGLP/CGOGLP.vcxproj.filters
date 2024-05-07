@@ -25,6 +25,9 @@
     <Filter Include="Resource Files\Models">
       <UniqueIdentifier>{b8883ca3-6195-48d2-8de4-b3e175bf5e47}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Sound">
+      <UniqueIdentifier>{ea874997-5c72-4132-a88e-c3d3de70db50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">

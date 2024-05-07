@@ -16,6 +16,10 @@
 
 
 #include <vector>
+#include <Windows.h>
+#include <mmsystem.h>
+
+#pragma comment(lib, "winmm.lib")
 
 
 //Functions
@@ -576,12 +580,6 @@ int main()
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    
-
-
-
-
-
     int counter = 0;
     // render loop
     while (!glfwWindowShouldClose(window)) //order: Terrain -> Lights -> Objects
@@ -871,6 +869,8 @@ void inputProcessor(GLFWwindow* window)
         //cubePositions.push_back(glm::vec3(bbbb.x , bbbb.y, bbbb.z));
         cubePositions.push_back(glm::vec3(bbbb.x, bbbb.y, bbbb.z));
         std::cout << " size of thingy" << cubePositions.size() << std::endl;
+        std::cout << "Play sound" << std::endl;
+        PlaySound(TEXT("laserspawngun.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
 }
 
