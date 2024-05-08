@@ -8,6 +8,8 @@
 
 #include <iostream>
 #include <chrono>
+#include <cstdlib>
+#include <ctime>
 
 #include "Model.h"
 
@@ -32,6 +34,7 @@ glm::vec3 calculateRayDirection( const glm::mat4& projectionMatrix, const glm::m
 void terrainHeightEdditor(float x, float z, int height, int width);
 glm::vec3 calculateRayTerrainIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, int width, int height);
 void drawCrosshair();
+void renderModels(Shader modelshader, int modelNr, float xPos, float zPos);
 
 //Settings
 const int WINDOW_WIDTH = 1280;
@@ -152,11 +155,19 @@ glm::vec3 lightPositions[] = {
 };
 
 std::vector<float> vertices;
+std::vector <Model> models;
+
+//modelPlaces
+std::vector <float> modelPositions = { //altijd ene in als voorbeeld
+        //modelnr , xpos, ypos
+        1.0f, 30.0f, 20.0f
+};
 
 
 int main()
 {
-
+    //randomnumber seed
+    srand(time(0));
 
     //configure glfw
     glfwInit();
@@ -167,7 +178,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	//Window
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Bjarne loves Jens xxx", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Southpark SnowDay 2.01 - The return of chef", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -536,6 +547,19 @@ int main()
     // load models
     // -----------
     Model cartman("Resources/Models/Cartman/cartman.obj");//kleine reminder, vond dll niet. opgtelost me env path maar mess toch in vs oplossen
+    Model chef("Resources/Models/Chef/Chef.obj");
+    Model kenny("Resources/Models/Kenny/Kenny.obj");
+    Model kyle("Resources/Models/Kyle/Kyle.obj");
+    Model stan("Resources/Models/Stan/Stan.obj");
+    Model tank("Resources/Models/Tank/Tank.obj");
+    models = {
+        cartman,
+        chef,
+        kenny,
+        kyle,
+        stan,
+        tank
+    };
 
 
     //uniform dingen initialiseren
@@ -749,6 +773,7 @@ int main()
         modelShaders.setVec3("pointLightPoses[0]", lightPositions[0]);
         modelShaders.setVec3("pointLightPoses[1]", lightPositions[1]);
         
+        /*
         // render the loaded model
         glm::mat4 model1 = glm::mat4(1.0f);
         //height aanpassen op positie van waar die staat maar nu niet zo belangerijk
@@ -757,6 +782,13 @@ int main()
         model1 = glm::rotate(model1, glm::radians(90.0f),glm::vec3(0.0f, 1.0f, 0.0f)); //rotate (licht wordt precies nie mee gedraait)
         modelShaders.setMat4("model", model1);
         cartman.Draw(modelShaders);
+        */
+        //renderModels(modelShaders, 1,  20.0f, 10.0f);
+        for (unsigned int i = 0; i < modelPositions.size(); i +=3)
+        {
+            renderModels(modelShaders, (int)modelPositions[i], modelPositions[i+1], modelPositions[i+2]);
+        }
+
 
         glDepthFunc(GL_LEQUAL);
 
@@ -801,6 +833,30 @@ int main()
     glfwTerminate();
     return 0;
 
+}
+
+void renderModels(Shader modelshader, int modelNr, float xPos, float zPos) {
+
+    float height = 1756.0f;
+    float width = 2624.0f;
+
+    // Normalize the camera's position to the range of the terrain
+    int normCamX = (xPos + height / 2.0f) * (float)height / height;
+    int normCamZ = (zPos + width / 2.0f) * (float)width / width;
+
+    // Find the corresponding vertex in the terrain data
+    int vertexIndex = 8 * (normCamX * width + normCamZ); // 8 because each vertex has 8 components (vx, vy, vz, u, v, nx, xy, xz)
+
+    // Get the height of the terrain at the camera's position
+    float terrainHeight = vertices[vertexIndex + 1];
+
+    glm::mat4 model = glm::mat4(1.0f);
+    //height aanpassen op positie van waar die staat maar nu niet zo belangerijk
+    model = glm::translate(model, glm::vec3(xPos, terrainHeight, zPos)); // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));	// it's still too big (kleiner nr kleinre grootte)
+    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate (licht wordt precies nie mee gedraait)
+    modelshader.setMat4("model", model);
+    models[modelNr].Draw(modelshader);
 }
 
 unsigned int loadCubemap(vector<std::string> faces)
@@ -867,17 +923,21 @@ void inputProcessor(GLFWwindow* window)
         if (elapsedTime >= 1000) { // 1 second
             std::cout << "Mouse left" << std::endl;
 
-            glm::vec3 aaaa = calculateRayDirection( glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f),camera.GetViewMatrix());
-            glm::vec3 bbbb = calculateRayTerrainIntersection(camera.Position, aaaa, 1756, 2624);
+            glm::vec3 rayDirection = calculateRayDirection( glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f),camera.GetViewMatrix());
+            glm::vec3 rayIntersection = calculateRayTerrainIntersection(camera.Position, rayDirection, 1756, 2624);
             //std::cout << " x:" << aaaa.x << " y:" << aaaa.y << " z:"<< aaaa.z << std::endl;
-            std::cout << " x:" << bbbb.x << " y:" << bbbb.y << " z:"<< bbbb.z << std::endl;
+            std::cout << " x:" << rayIntersection.x << " y:" << rayIntersection.y << " z:"<< rayIntersection.z << std::endl;
             //width and heigth of terrain file
             //terrainHeightEdditor(aaaa.x, aaaa.z,1756,2624);
-            //cubePositions.push_back(glm::vec3(bbbb.x , bbbb.y, bbbb.z));
-            cubePositions.push_back(glm::vec3(bbbb.x, bbbb.y, bbbb.z));
+            //cubePositions.push_back(glm::vec3(bbbb.x, bbbb.y, bbbb.z));
+            modelPositions.push_back(rand() % models.size());
+            modelPositions.push_back(rayIntersection.x);
+            modelPositions.push_back(rayIntersection.z);
+
             std::cout << " size of thingy" << cubePositions.size() << std::endl;
             std::cout << "Play sound" << std::endl;
             PlaySound(TEXT("laserspawngun.wav"), NULL, SND_FILENAME | SND_ASYNC);
+
             // Update the last press time
             lastPressTime = currentTime;
         }
