@@ -7,6 +7,7 @@
 #include "glm/ext.hpp"
 
 #include <iostream>
+#include <chrono>
 
 #include "Model.h"
 
@@ -47,6 +48,9 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
+
+//global var
+auto lastPressTime = std::chrono::steady_clock::now();
 
 
 //Cube
@@ -858,19 +862,25 @@ void inputProcessor(GLFWwindow* window)
         camera.ProcessKeyboard(RIGHT, shift, deltaTime);
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-        std::cout << "Mouse left" << std::endl;
+        auto currentTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastPressTime).count();
+        if (elapsedTime >= 1000) { // 1 second
+            std::cout << "Mouse left" << std::endl;
 
-        glm::vec3 aaaa = calculateRayDirection( glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f),camera.GetViewMatrix());
-        glm::vec3 bbbb = calculateRayTerrainIntersection(camera.Position, aaaa, 1756, 2624);
-        //std::cout << " x:" << aaaa.x << " y:" << aaaa.y << " z:"<< aaaa.z << std::endl;
-        std::cout << " x:" << bbbb.x << " y:" << bbbb.y << " z:"<< bbbb.z << std::endl;
-        //width and heigth of terrain file
-        //terrainHeightEdditor(aaaa.x, aaaa.z,1756,2624);
-        //cubePositions.push_back(glm::vec3(bbbb.x , bbbb.y, bbbb.z));
-        cubePositions.push_back(glm::vec3(bbbb.x, bbbb.y, bbbb.z));
-        std::cout << " size of thingy" << cubePositions.size() << std::endl;
-        std::cout << "Play sound" << std::endl;
-        PlaySound(TEXT("laserspawngun.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            glm::vec3 aaaa = calculateRayDirection( glm::perspective(glm::radians(camera.FieldOfVieuw), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.1f, 100.0f),camera.GetViewMatrix());
+            glm::vec3 bbbb = calculateRayTerrainIntersection(camera.Position, aaaa, 1756, 2624);
+            //std::cout << " x:" << aaaa.x << " y:" << aaaa.y << " z:"<< aaaa.z << std::endl;
+            std::cout << " x:" << bbbb.x << " y:" << bbbb.y << " z:"<< bbbb.z << std::endl;
+            //width and heigth of terrain file
+            //terrainHeightEdditor(aaaa.x, aaaa.z,1756,2624);
+            //cubePositions.push_back(glm::vec3(bbbb.x , bbbb.y, bbbb.z));
+            cubePositions.push_back(glm::vec3(bbbb.x, bbbb.y, bbbb.z));
+            std::cout << " size of thingy" << cubePositions.size() << std::endl;
+            std::cout << "Play sound" << std::endl;
+            PlaySound(TEXT("laserspawngun.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            // Update the last press time
+            lastPressTime = currentTime;
+        }
     }
 }
 
