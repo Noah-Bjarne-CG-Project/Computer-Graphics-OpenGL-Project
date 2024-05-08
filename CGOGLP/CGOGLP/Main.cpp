@@ -35,6 +35,7 @@ void terrainHeightEdditor(float x, float z, int height, int width);
 glm::vec3 calculateRayTerrainIntersection(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, int width, int height);
 void drawCrosshair();
 void renderModels(Shader modelshader, int modelNr, float xPos, float zPos);
+void superJumpFunction();
 
 //Settings
 const int WINDOW_WIDTH = 1280;
@@ -47,6 +48,9 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 float lastX = WINDOW_WIDTH / 2.0f;
 float lastY = WINDOW_HEIGHT / 2.0f;
 bool firstMouse = true;
+float jumpHeight = 0.0f;
+float JumpSpeed = 5.0f;
+bool isJumping = false;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -679,10 +683,13 @@ int main()
 
         //--------------------------------------------------------------
 
+        if (jumpHeight > 0.0f || isJumping) {
+            superJumpFunction();
+        }
 
 
         // camera/view transformation
-        camera.SetCameraHeight(terrainHeight + PLAYER_HEIGHT);
+        camera.SetCameraHeight(terrainHeight + PLAYER_HEIGHT + jumpHeight);
         //camera.SetCameraHeight(12.0f);
         //std::cout << "camera height " << camera.GetHeight() << std::endl;
         glm::mat4 view = camera.GetViewMatrix();
@@ -817,6 +824,7 @@ int main()
         glfwSwapBuffers(window);
         //Check for events
         glfwPollEvents();
+
     }
 
     // cleanup
@@ -857,6 +865,26 @@ void renderModels(Shader modelshader, int modelNr, float xPos, float zPos) {
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); //rotate (licht wordt precies nie mee gedraait)
     modelshader.setMat4("model", model);
     models[modelNr].Draw(modelshader);
+}
+
+//SUPERbasicJUMPFUNCTION (berekent geen acceleratie of zwaartekracht ofzo)
+void superJumpFunction() { 
+    if (isJumping) {
+        jumpHeight += JumpSpeed * deltaTime;
+
+        // Stop met springen als we een bepaalde hoogte bereiken
+        if (jumpHeight > 1.0f) {
+            isJumping = false;
+        }
+    }
+    else {
+        jumpHeight -= JumpSpeed * deltaTime;
+
+        // Stop met vallen als we de grond bereiken
+        if (jumpHeight < 0.0f) {
+            jumpHeight = 0.0f;
+        }
+    }
 }
 
 unsigned int loadCubemap(vector<std::string> faces)
@@ -916,6 +944,12 @@ void inputProcessor(GLFWwindow* window)
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera.ProcessKeyboard(RIGHT, shift, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        if (jumpHeight <= 0.0f && !isJumping) {
+            isJumping = true;
+        }
+        std::cout << "Space" << std::endl;
     }
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
         auto currentTime = std::chrono::steady_clock::now();
