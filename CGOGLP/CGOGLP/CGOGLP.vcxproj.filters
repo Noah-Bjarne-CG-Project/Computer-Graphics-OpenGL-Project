@@ -91,6 +91,8 @@
     <None Include="2dshader.frag">
       <Filter>Resource Files\Shaders</Filter>
     </None>
+    <None Include="Rain.frag" />
+    <None Include="Rain.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\grassy.jpg">

@@ -10,6 +10,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 #include "Model.h"
 
@@ -25,6 +26,11 @@
 #pragma comment(lib, "winmm.lib")
 
 
+struct Particle {
+    float x, y, z, vy;
+};
+
+
 //Functions
 void inputProcessor(GLFWwindow* window);
 void mouse_movement(GLFWwindow* window, double xposIn, double yposIn);
@@ -36,6 +42,7 @@ glm::vec3 calculateRayTerrainIntersection(const glm::vec3& rayOrigin, const glm:
 void drawCrosshair();
 void renderModels(Shader modelshader, int modelNr, float xPos, float zPos);
 void superJumpFunction();
+void updateParticles(std::vector<Particle>& particles, GLuint& vbo);
 
 //Settings
 const int WINDOW_WIDTH = 1280;
@@ -247,6 +254,29 @@ int main()
             texCoords.push_back(v);
         }
     }
+
+    const int MAX_PARTICLES = 10000;
+    std::vector<Particle> particles(MAX_PARTICLES);
+    for (auto& p : particles) {
+        p.x = static_cast<float>(rand() % 100 - 50);
+        p.y = static_cast<float>(rand() % 100);
+        p.z = static_cast<float>(rand() % 100 - 50);
+        p.vy = -0.1f - static_cast<float>(rand() % 100) / 1000.0f;
+    }
+
+    GLuint vao, vbo;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * particles.size(), particles.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
 
     // vertex generation
@@ -639,6 +669,18 @@ int main()
         terrainShaders.setFloat("heigth0", lowestPoint + heigthcalc);
         terrainShaders.setFloat("heigth1", lowestPoint + (heigthcalc * 2));
         terrainShaders.setFloat("heigth2", lowestPoint + (heigthcalc * 3));
+
+        updateParticles(particles, vbo);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glPointSize(2.0f);
+        glBindVertexArray(vao);
+        glDrawArrays(GL_POINTS, 0, MAX_PARTICLES);
+
+        glBindVertexArray(0);
+        glDisable(GL_BLEND);
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -1138,4 +1180,16 @@ void drawCrosshair() {
     glDeleteVertexArrays(1, &crosshairVAO);
     glDeleteBuffers(1, &crosshairVBO);
 }
+
+void updateParticles(std::vector<Particle>& particles, GLuint& vbo) {
+    for (auto& p : particles) {
+        p.y += p.vy;
+        if (p.y < -10) {
+            p.y = 50;
+        }
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * particles.size(), particles.data(), GL_STATIC_DRAW);
+}
+
 

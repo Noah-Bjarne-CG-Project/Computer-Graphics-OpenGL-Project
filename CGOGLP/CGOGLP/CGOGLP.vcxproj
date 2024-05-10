@@ -156,6 +156,8 @@
     <None Include="ModelShader.vert" />
     <None Include="ObjectShader.frag" />
     <None Include="ObjectShader.vert" />
+    <None Include="Rain.vert" />
+    <None Include="Rain.frag" />
     <None Include="Skybox.frag" />
     <None Include="Skybox.vert" />
     <None Include="TerrainShader.frag" />
