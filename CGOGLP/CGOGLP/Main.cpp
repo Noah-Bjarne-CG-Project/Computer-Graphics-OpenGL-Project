@@ -769,8 +769,7 @@ int main()
         //lightPositions->length()
         for (unsigned int i = 0; i < 2; i++)
         {
-            // calculate the model matrix for each object and pass it to shader before drawing
-            glm::mat4 modelLight = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+            glm::mat4 modelLight = glm::mat4(1.0f);
             modelLight = glm::translate(modelLight, lightPositions[i]);
             lightningShaders.setMat4("model", modelLight);
 
@@ -1053,7 +1052,7 @@ void mouse_movement(GLFWwindow* window, double xposIn, double yposIn)
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+    float yoffset = lastY - ypos;
 
     lastX = xpos;
     lastY = ypos;
